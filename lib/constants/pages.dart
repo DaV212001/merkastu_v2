@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:merkastu_v2/screens/auth/log_in_screen.dart';
+import 'package:merkastu_v2/screens/auth/phone_verification_screen.dart';
 import 'package:merkastu_v2/screens/auth/sign_up_screen.dart';
 import 'package:merkastu_v2/screens/favorites/favorite_products_screen.dart';
 import 'package:merkastu_v2/screens/favorites/favorite_restaurants_screen.dart';
@@ -39,6 +40,7 @@ class Routes {
   static String get forgotPasswordRoute => '/forgot_password';
   static String get profileRoute => '/profile';
   static String get settingsRoute => '/settings';
+  static String get phoneVerifyRoute => '/phone_verify';
 }
 
 class Pages {
@@ -60,6 +62,9 @@ class Pages {
       name: Routes.signupRoute,
       page: () => const SignUpScreen(),
     ),
+    GetPage(
+        name: Routes.phoneVerifyRoute,
+        page: () => const PhoneVerificationScreen()),
     //////////////////////////////////
     //favorites
     GetPage(

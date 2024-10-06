@@ -28,14 +28,14 @@ ThemeData appTheme(BuildContext context, {bool? isDark}) {
       scaffoldBackgroundColor:
           (isDark ?? true) ? themeColor.surfaceContainer : Colors.white,
       elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ButtonStyle(
-            shape: WidgetStatePropertyAll<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
-            )),
-            // minimumSize: MaterialStateProperty.all(Size(double.infinity, 50)),
-            backgroundColor: WidgetStatePropertyAll(themeColor.primary),
-            overlayColor:
-                WidgetStatePropertyAll(themeColor.onPrimaryContainer)),
-      ));
+          style: ButtonStyle(
+        shape: WidgetStatePropertyAll<RoundedRectangleBorder>(
+            RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        )),
+        // minimumSize: MaterialStateProperty.all(Size(double.infinity, 50)),
+        backgroundColor: WidgetStatePropertyAll(themeColor.primary),
+        // overlayColor:
+        //     WidgetStatePropertyAll(themeColor.onPrimaryContainer)),
+      )));
 }

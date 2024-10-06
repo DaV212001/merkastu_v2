@@ -72,15 +72,13 @@ class _PasswordInputState extends State<PasswordInput> {
             ),
           ),
           errorStyle: const TextStyle(
-              color: Colors.red,
-              fontFamily: 'Montserrat',
-              fontWeight: FontWeight.w400)),
+              fontFamily: 'Montserrat', fontWeight: FontWeight.w400)),
       autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: (val) {
         if (val == null || val.isEmpty) {
           return 'Please enter a password';
-        } else if (val.length < 6) {
-          return 'Password must be at least 6 characters long';
+        } else if (val.length != 6) {
+          return 'Password must be exactly 6 characters long';
         }
         return null;
       },

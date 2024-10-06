@@ -67,11 +67,62 @@ class LoginScreen extends StatelessWidget {
                           val; // Update password in controller
                     },
                   ),
-                  const Text('Password must be at least 8 characters long',
-                      style: TextStyle(color: Colors.grey)),
                 ],
               ),
-
+              // Use Obx to listen to loading state
+              Obx(() {
+                return loginController.isLoading.value
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 25.0),
+                        child: LoadingAnimatedButton(
+                          color: Colors.cyan,
+                          onTap: () {},
+                          child: const Text(
+                            "Loading",
+                            style: TextStyle(
+                                color: Colors.cyan,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16),
+                          ),
+                        ),
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.only(top: 25.0),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              gradient: LinearGradient(
+                                  colors: [maincolor, const Color(0xFF3AE0C4)]),
+                            ),
+                            child: ElevatedButton(
+                              style: ButtonStyle(
+                                elevation: WidgetStateProperty.all(0),
+                                alignment: Alignment.center,
+                                padding: WidgetStateProperty.all(
+                                  const EdgeInsets.only(
+                                      right: 75, left: 75, top: 15, bottom: 15),
+                                ),
+                                backgroundColor:
+                                    WidgetStateProperty.all(Colors.transparent),
+                                shape: WidgetStateProperty.all(
+                                  RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15)),
+                                ),
+                              ),
+                              onPressed: () async {
+                                await loginController
+                                    .login(); // Call the login function
+                              },
+                              child: const Text("Login",
+                                  style: TextStyle(
+                                      color: Color(0xffffffff), fontSize: 16)),
+                            ),
+                          ),
+                        ),
+                      );
+              }),
               const SizedBox(height: 16.0),
               Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -97,58 +148,6 @@ class LoginScreen extends StatelessWidget {
                       ),
                     )
                   ]),
-
-              // Use Obx to listen to loading state
-              Obx(() {
-                return loginController.isLoading.value
-                    ? Padding(
-                        padding: const EdgeInsets.only(top: 25.0),
-                        child: LoadingAnimatedButton(
-                          color: Colors.cyan,
-                          onTap: () {},
-                          child: const Text(
-                            "Loading",
-                            style: TextStyle(
-                                color: Colors.cyan,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16),
-                          ),
-                        ),
-                      )
-                    : Padding(
-                        padding: const EdgeInsets.only(top: 25.0),
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            gradient: LinearGradient(
-                                colors: [maincolor, const Color(0xFF3AE0C4)]),
-                          ),
-                          child: ElevatedButton(
-                            style: ButtonStyle(
-                              elevation: WidgetStateProperty.all(0),
-                              alignment: Alignment.center,
-                              padding: WidgetStateProperty.all(
-                                const EdgeInsets.only(
-                                    right: 75, left: 75, top: 15, bottom: 15),
-                              ),
-                              backgroundColor:
-                                  WidgetStateProperty.all(Colors.transparent),
-                              shape: WidgetStateProperty.all(
-                                RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15)),
-                              ),
-                            ),
-                            onPressed: () async {
-                              await loginController
-                                  .login(); // Call the login function
-                            },
-                            child: const Text("Login",
-                                style: TextStyle(
-                                    color: Color(0xffffffff), fontSize: 16)),
-                          ),
-                        ),
-                      );
-              }),
             ],
           ),
         ),

@@ -20,61 +20,56 @@ class EmailInput extends StatefulWidget {
 class EmailInputFb1State extends State<EmailInput> {
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: widget.formKey,
-      child: TextFormField(
-        controller: widget.inputController,
-        keyboardType: TextInputType.emailAddress,
-        style: const TextStyle(fontSize: 14, color: Colors.black),
-        decoration: InputDecoration(
-          hintText: 'Enter your email',
-          hintStyle:
-              TextStyle(color: Colors.grey.withOpacity(.75), fontSize: 14),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: maincolor,
-              width: 1,
-            ),
-            borderRadius: BorderRadius.circular(12.0),
+    return TextFormField(
+      controller: widget.inputController,
+      keyboardType: TextInputType.emailAddress,
+      decoration: InputDecoration(
+        hintText: 'Enter your email',
+        hintStyle: TextStyle(color: Colors.grey.withOpacity(.75), fontSize: 14),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: maincolor,
+            width: 1,
           ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: maincolor,
-              width: 1,
-            ),
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: maincolor,
-              width: 1,
-            ),
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: maincolor,
-              width: 1,
-            ),
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-          errorStyle: const TextStyle(
-            color: Colors.red,
-            fontFamily: 'Montserrat',
-            fontWeight: FontWeight.w400,
-          ),
+          borderRadius: BorderRadius.circular(12.0),
         ),
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-        onChanged: widget.onChanged,
-        validator: (value) {
-          if (value!.isEmpty) {
-            return 'Please enter an email';
-          } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-            return 'Please enter a valid email address';
-          }
-          return null;
-        },
+        focusedErrorBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: maincolor,
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: maincolor,
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: maincolor,
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        errorStyle: const TextStyle(
+          fontFamily: 'Montserrat',
+          fontWeight: FontWeight.w400,
+        ),
       ),
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      onChanged: widget.onChanged,
+      validator: (value) {
+        if (value!.isEmpty) {
+          return 'Please enter an email';
+        } else if (!RegExp(r'^[a-z]+\.[a-z]+@aastustudent\.edu\.et$')
+            .hasMatch(value)) {
+          return 'Please enter a valid AASTU email address\n(firstname.lastname@aastustudent.edu.et)';
+        }
+        return null;
+      },
     );
   }
 }
