@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 ColorScheme appColor([bool? isDark]) => ColorScheme.fromSeed(
-    seedColor: const Color(0xFF3AE0C4),
-    primary: const Color(0xFF3AE0C4),
+    seedColor: const Color(0xFF039D55),
+    primary: const Color(0xFF039D55),
     secondary: const Color(0xFF062945),
     dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
     brightness: isDark == null
@@ -18,6 +18,7 @@ ThemeData appTheme(BuildContext context, {bool? isDark}) {
       colorScheme: themeColor,
       fontFamily: 'Montserrat',
       useMaterial3: true,
+      cardColor: isDark == true ? themeColor.surface : Colors.white,
       tabBarTheme: TabBarTheme(
         labelStyle: TextStyle(
             color: (isDark ?? true) ? Colors.white : themeColor.primary,

@@ -40,7 +40,10 @@ class ErrorUtil {
         error.contains('Connection refused') ||
         error.contains('Connection reset by peer') ||
         error.contains('ClientException with SocketException') ||
-        error.contains('Connection timed out')) {
+        error.contains('Connection timed out') ||
+        error.contains('connection timeout') ||
+        error.contains('receive timeout') ||
+        error.contains('Connection closed')) {
       return ErrorData(
         title: "",
         body: "Please check your internet connection and try again.",

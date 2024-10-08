@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:merkastu_v2/constants/constants.dart';
 
 import '../../controllers/auth_controller.dart';
 
@@ -73,9 +74,9 @@ class PhoneVerificationScreenState extends State<PhoneVerificationScreen>
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: signUpController.launchTelegram,
-                    child: const Text(
+                    child: Text(
                       "Launch Telegram",
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: secondarycolor),
                     ),
                   ),
                 ),

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:merkastu_v2/components/email_input_field.dart';
-import 'package:merkastu_v2/components/loading_animated_button.dart';
-import 'package:merkastu_v2/components/password_input_field.dart';
 import 'package:merkastu_v2/constants/constants.dart';
 import 'package:merkastu_v2/screens/auth/sign_up_screen.dart';
 
 import '../../controllers/auth_controller.dart';
+import '../../widgets/loading_animated_button.dart';
+import '../../widgets/password_input_field.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -22,7 +21,6 @@ class LoginScreen extends StatelessWidget {
         automaticallyImplyLeading: false,
         leadingWidth: 40,
         elevation: 0,
-        backgroundColor: Colors.white,
         title: const Center(
           child: Text('Login',
               style: TextStyle(
@@ -48,26 +46,30 @@ class LoginScreen extends StatelessWidget {
                 child: SvgPicture.asset('assets/images/login.svg'),
               ),
 
-              Column(
-                children: [
-                  EmailInput(
-                    inputController: TextEditingController(),
-                    onChanged: (val) {
-                      loginController.email.value =
-                          val; // Update email in controller
-                    },
-                  ),
-                  const SizedBox(height: 16.0),
-                  PasswordInput(
-                    textEditingController:
-                        TextEditingController(), // Not needed if using form fields in controller
-                    hintText: 'Enter your password',
-                    onChanged: (val) {
-                      loginController.password.value =
-                          val; // Update password in controller
-                    },
-                  ),
-                ],
+              Form(
+                key: loginController.formKey,
+                child: Column(
+                  children: [
+                    PhoneNumberInput(
+                      textEditingController: TextEditingController(
+                          text: loginController.phone.value),
+                      onChanged: (val) {
+                        loginController.phone.value =
+                            val; // Update email in controller
+                      },
+                    ),
+                    PasswordInput(
+                      textEditingController: TextEditingController(
+                          text: loginController.password
+                              .value), // Not needed if using form fields in controller
+                      hintText: 'Enter your password',
+                      onChanged: (val) {
+                        loginController.password.value =
+                            val; // Update password in controller
+                      },
+                    ),
+                  ],
+                ),
               ),
               // Use Obx to listen to loading state
               Obx(() {
@@ -75,12 +77,13 @@ class LoginScreen extends StatelessWidget {
                     ? Padding(
                         padding: const EdgeInsets.only(top: 25.0),
                         child: LoadingAnimatedButton(
-                          color: Colors.cyan,
+                          color: maincolor,
+                          width: double.infinity,
                           onTap: () {},
-                          child: const Text(
-                            "Loading",
+                          child: Text(
+                            "Logging in...",
                             style: TextStyle(
-                                color: Colors.cyan,
+                                color: maincolor,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16),
                           ),
@@ -94,7 +97,7 @@ class LoginScreen extends StatelessWidget {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(15),
                               gradient: LinearGradient(
-                                  colors: [maincolor, const Color(0xFF3AE0C4)]),
+                                  colors: [maincolor, maincolor]),
                             ),
                             child: ElevatedButton(
                               style: ButtonStyle(
@@ -139,12 +142,12 @@ class LoginScreen extends StatelessWidget {
                         Get.to(() =>
                             const SignUpScreen()); // Use Get for navigation
                       },
-                      child: const Text(
+                      child: Text(
                         " Sign Up",
                         style: TextStyle(
-                            color: Colors.blue,
+                            color: maincolor,
                             fontFamily: 'Montserrat',
-                            fontWeight: FontWeight.w400),
+                            fontWeight: FontWeight.bold),
                       ),
                     )
                   ]),

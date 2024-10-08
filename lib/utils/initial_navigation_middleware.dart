@@ -6,8 +6,7 @@ class InitialNavigationMiddleware extends GetMiddleware {
   @override
   RouteSettings? redirect(String? route) {
     // Check if the user is logged in
-    bool isAuthenticated =
-        ConfigPreference.isUserLoggedIn();
+    bool isAuthenticated = ConfigPreference.isUserLoggedIn();
     if (!isAuthenticated) {
       return const RouteSettings(name: '/login'); // Redirect to login page
     }

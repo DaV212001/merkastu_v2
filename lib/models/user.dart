@@ -6,8 +6,10 @@ class User {
   final int? phone;
   final int? block;
   final int? room;
+  final String? accessToken;
 
   User({
+    this.accessToken,
     this.id,
     this.firstName,
     this.lastName,
@@ -29,15 +31,15 @@ class User {
     };
   }
 
-  factory User.fromJson(Map<String, dynamic> json) {
+  factory User.fromJson(Map<String, dynamic> json, String accessToken) {
     return User(
-      id: json['id'],
-      firstName: json['first_name'],
-      lastName: json['last_name'],
-      email: json['email'],
-      phone: json['phone'],
-      block: json['block'],
-      room: json['room'],
-    );
+        id: json['id'],
+        firstName: json['first_name'],
+        lastName: json['last_name'],
+        email: json['email'],
+        phone: json['phone'],
+        block: json['block'],
+        room: json['room'],
+        accessToken: accessToken);
   }
 }

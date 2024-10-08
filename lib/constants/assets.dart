@@ -14,4 +14,6 @@ class Assets {
       'assets/images/errors/internal_server_error.svg';
   static const String errorsNotVerified =
       'assets/images/errors/not_verified.svg';
+  static const String empty = 'assets/images/empty.svg';
+  static const String emptyCart = 'assets/images/errors/empty_cart.svg';
 }

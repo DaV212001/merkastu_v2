@@ -4,13 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:merkastu_v2/constants/constants.dart';
 import 'package:merkastu_v2/screens/favorites/favorites_screen.dart';
-import 'package:merkastu_v2/screens/home/restaurant_list_screen.dart';
-import 'package:merkastu_v2/screens/order/check_out_screen.dart';
+import 'package:merkastu_v2/screens/home/store_list_screen.dart';
+import 'package:merkastu_v2/screens/order/cart_screen.dart';
 import 'package:merkastu_v2/screens/order/order_history_screen.dart';
 import 'package:merkastu_v2/screens/settings/settings_srceen.dart';
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 
+import '../constants/pages.dart';
+import '../controllers/home_controller.dart';
 import '../controllers/theme_mode_controller.dart';
 
 class MainLayoutScreen extends StatefulWidget {
@@ -21,20 +24,20 @@ class MainLayoutScreen extends StatefulWidget {
 }
 
 class _MainLayoutScreenState extends State<MainLayoutScreen> {
+  var homeController = Get.put(HomeController(), tag: 'home');
   List<Widget> _buildScreens() {
     return [
-      const RestaurantListScreen(),
+      StoreListScreen(),
       const FavoritesScreen(),
-      const CheckOutScreen(),
+      CartScreen(),
       const OrderHistoryScreen(),
       const SettingsSrceen(),
     ];
   }
 
   List<PersistentBottomNavBarItem> _navBarsItems() {
-    Color activeColor = ThemeModeController.isCurrentlyLight()
-        ? const Color(0xFF3AE0C4)
-        : Colors.white;
+    Color activeColor =
+        ThemeModeController.isCurrentlyLight() ? maincolor : Colors.white;
     Color? inactiveColor = ThemeModeController.isCurrentlyLight()
         ? Colors.black
         : Colors.white.withOpacity(0.4);
@@ -44,7 +47,7 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
         icon: Icon(
           EneftyIcons.home_2_bold,
           color: activeColor,
-          size: size,
+          size: 35,
         ),
         inactiveIcon: Icon(
           HugeIcons.strokeRoundedHome01,
@@ -60,7 +63,7 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
         icon: Icon(
           EneftyIcons.heart_bold,
           color: activeColor,
-          size: size,
+          size: 35,
         ),
         inactiveIcon: Icon(
           EneftyIcons.heart_outline,
@@ -73,42 +76,43 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
         inactiveColorPrimary: inactiveColor,
       ),
       PersistentBottomNavBarItem(
+        onPressed: (context) {
+          Get.toNamed(Routes.cartRoute);
+        },
         icon: Center(
             child: Obx(
           () => badges.Badge(
-            badgeContent: Obx(() => const Padding(
-                  padding: EdgeInsets.all(1.0),
+            badgeContent: Obx(() => Padding(
+                  padding: const EdgeInsets.all(1.0),
                   child: Text(
-                    '0',
-                    style: TextStyle(color: Colors.white),
+                    homeController.itemsInCart.value.toString(),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 )),
-            showBadge: true,
+            showBadge: homeController.itemsInCart.value > 0,
             child: Icon(
               EneftyIcons.shopping_cart_bold,
-              color: activeColor,
-              size: size,
+              color: secondarycolor,
+              size: 35,
             ),
           ),
         )),
         inactiveIcon: Center(
-            child: Obx(
-          () => badges.Badge(
-            badgeContent: Obx(() => const Padding(
-                  padding: EdgeInsets.all(1.0),
-                  child: Text(
-                    '0',
-                    style: TextStyle(color: Colors.white),
+            child: Obx(() => badges.Badge(
+                  badgeContent: Obx(() => Padding(
+                        padding: const EdgeInsets.all(1.0),
+                        child: Text(
+                          homeController.itemsInCart.value.toString(),
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      )),
+                  showBadge: homeController.itemsInCart.value > 0,
+                  child: Icon(
+                    EneftyIcons.shopping_cart_outline,
+                    color: secondarycolor,
+                    size: 35,
                   ),
-                )),
-            showBadge: true,
-            child: Icon(
-              EneftyIcons.shopping_cart_outline,
-              color: inactiveColor,
-              size: size,
-            ),
-          ),
-        )),
+                ))),
         // title: ('Chats'),
         // textStyle: TextStyle(color: activeColor),
         activeColorPrimary: activeColor,
@@ -118,7 +122,7 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
         icon: Icon(
           EneftyIcons.note_2_bold,
           color: activeColor,
-          size: size,
+          size: 35,
         ),
         inactiveIcon: Icon(
           EneftyIcons.note_2_outline,
@@ -134,7 +138,7 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
         icon: Icon(
           EneftyIcons.setting_2_bold,
           color: activeColor,
-          size: size,
+          size: 35,
         ),
         inactiveIcon: Icon(
           EneftyIcons.setting_2_outline,
@@ -172,8 +176,16 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
       backgroundColor: Theme.of(context).cardColor,
       decoration: NavBarDecoration(
         borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(15), topRight: Radius.circular(15)),
-        colorBehindNavBar: Theme.of(context).scaffoldBackgroundColor,
+            topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            spreadRadius: 5,
+            blurRadius: 7,
+            offset: const Offset(0, 3), // changes position of shadow
+          ),
+        ],
+        colorBehindNavBar: Theme.of(context).cardColor,
       ),
       animationSettings: const NavBarAnimationSettings(
         navBarItemAnimation: ItemAnimationSettings(
@@ -187,7 +199,7 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
           duration: Duration(milliseconds: 200),
         ),
       ),
-      navBarHeight: 70.h,
+      navBarHeight: 50.h,
       navBarStyle: NavBarStyle.style15,
     );
   }

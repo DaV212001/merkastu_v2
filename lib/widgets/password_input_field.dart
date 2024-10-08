@@ -29,8 +29,7 @@ class _PasswordInputState extends State<PasswordInput> {
       onChanged: widget.onChanged,
       decoration: InputDecoration(
           hintText: widget.hintText,
-          hintStyle:
-              TextStyle(color: Colors.grey.withOpacity(.75), fontSize: 14),
+          hintStyle: const TextStyle(fontSize: 14),
           enabledBorder: OutlineInputBorder(
             borderSide: BorderSide(
               color: maincolor,
@@ -67,7 +66,6 @@ class _PasswordInputState extends State<PasswordInput> {
               pwdVisibility
                   ? Icons.visibility_outlined
                   : Icons.visibility_off_outlined,
-              color: Colors.grey.shade400,
               size: 18,
             ),
           ),

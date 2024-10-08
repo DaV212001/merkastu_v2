@@ -5,16 +5,16 @@ import 'package:merkastu_v2/screens/auth/sign_up_screen.dart';
 import 'package:merkastu_v2/screens/favorites/favorite_products_screen.dart';
 import 'package:merkastu_v2/screens/favorites/favorite_restaurants_screen.dart';
 import 'package:merkastu_v2/screens/favorites/favorites_screen.dart';
-import 'package:merkastu_v2/screens/home/restaurant_detail_screen.dart';
-import 'package:merkastu_v2/screens/home/restaurant_list_screen.dart';
+import 'package:merkastu_v2/screens/home/store_detail_screen.dart';
+import 'package:merkastu_v2/screens/home/store_list_screen.dart';
 import 'package:merkastu_v2/screens/main_layout_screen.dart';
 import 'package:merkastu_v2/screens/order/check_out_screen.dart';
 import 'package:merkastu_v2/screens/settings/password/forgot_password_screen.dart';
 import 'package:merkastu_v2/screens/settings/settings_srceen.dart';
 import 'package:merkastu_v2/utils/initial_navigation_middleware.dart';
 
+import '../screens/order/cart_screen.dart';
 import '../screens/order/order_history_screen.dart';
-import '../screens/order/order_list_screen.dart';
 import '../screens/settings/app_documentation/about_us_screen.dart';
 import '../screens/settings/app_documentation/privacy_policy_screen.dart';
 import '../screens/settings/app_documentation/terms_and_conditions_screen.dart';
@@ -32,7 +32,7 @@ class Routes {
   static String get restaurantDetailRoute => '/restaurant_detail';
   static String get checkoutRoute => '/checkout';
   static String get ordersHistoryRoute => '/orders_history';
-  static String get ordersRoute => '/orders';
+  static String get cartRoute => '/orders';
   static String get aboutRoute => '/about';
   static String get privacyRoute => '/privacy';
   static String get termsRoute => '/terms';
@@ -83,25 +83,25 @@ class Pages {
     //home
     GetPage(
       name: Routes.restaurantsRoute,
-      page: () => const RestaurantListScreen(),
+      page: () => StoreListScreen(),
     ),
     GetPage(
       name: Routes.restaurantDetailRoute,
-      page: () => const RestaurantDetailScreen(),
+      page: () => StoreDetailScreen(),
     ),
     ///////////////////////////////////
     //order
     GetPage(
       name: Routes.checkoutRoute,
-      page: () => const CheckOutScreen(),
+      page: () => CheckOutScreen(),
     ),
     GetPage(
       name: Routes.ordersHistoryRoute,
       page: () => const OrderHistoryScreen(),
     ),
     GetPage(
-      name: Routes.ordersRoute,
-      page: () => const OrderListScreen(),
+      name: Routes.cartRoute,
+      page: () => CartScreen(),
     ),
     ////////////////////////////////////
     //settings

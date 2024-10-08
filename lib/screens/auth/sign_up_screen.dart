@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:merkastu_v2/components/email_input_field.dart';
-import 'package:merkastu_v2/components/loading_animated_button.dart';
-import 'package:merkastu_v2/components/password_input_field.dart';
 
-import '../../components/custom_input_field.dart';
 import '../../constants/constants.dart';
 import '../../controllers/auth_controller.dart';
+import '../../widgets/custom_input_field.dart';
+import '../../widgets/email_input_field.dart';
+import '../../widgets/loading_animated_button.dart';
+import '../../widgets/password_input_field.dart';
 import 'log_in_screen.dart';
 
 class SignUpScreen extends StatelessWidget {
@@ -62,7 +62,6 @@ class _TabBarAndTabViewsState extends State<TabBarAndTabViews>
           Container(
             height: 45,
             decoration: BoxDecoration(
-              color: Colors.white,
               borderRadius: BorderRadius.circular(25.0),
             ),
             child: Padding(
@@ -134,93 +133,15 @@ class _TabBarAndTabViewsState extends State<TabBarAndTabViews>
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(color: Colors.black54),
               ),
               const SizedBox(
                 height: 5,
               ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 56.5,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border(
-                            top: BorderSide(color: maincolor, width: 1),
-                            bottom: BorderSide(color: maincolor, width: 1),
-                            left: BorderSide(color: maincolor, width: 1),
-                            right: BorderSide(color: maincolor, width: 1),
-                          )),
-                      child: const Center(
-                          child: Text(
-                        '+251',
-                        style: TextStyle(
-                            color: Colors.black, fontWeight: FontWeight.w400),
-                      )),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 5,
-                  ),
-                  Expanded(
-                    flex: 5,
-                    child: TextFormField(
-                      keyboardType: TextInputType.number,
-                      inputFormatters: <TextInputFormatter>[
-                        FilteringTextInputFormatter.digitsOnly
-                      ],
-                      controller: TextEditingController(
-                          text: signUpController.phone.value),
-                      decoration: InputDecoration(
-                        hintText: '9XX-XXX-XXX',
-                        hintStyle: TextStyle(
-                            color: Colors.grey.withOpacity(.75), fontSize: 14),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: maincolor,
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: maincolor,
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: maincolor,
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        helperText: ' ',
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: maincolor,
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        errorStyle: const TextStyle(
-                            fontFamily: 'Montserrat',
-                            fontWeight: FontWeight.w400),
-                      ),
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      validator: (value) {
-                        if (value == null || value.length != 9) {
-                          return 'Please enter exactly 9 digits';
-                        }
-                        return null;
-                      },
-                      onChanged: (val) => signUpController.phone.value = val,
-                    ),
-                  ),
-                ],
+              PhoneNumberInput(
+                textEditingController:
+                    TextEditingController(text: signUpController.phone.value),
+                onChanged: (val) => signUpController.phone.value = val,
               ),
               const Divider(
                 indent: 30,
@@ -357,9 +278,9 @@ class _TabBarAndTabViewsState extends State<TabBarAndTabViews>
                               signUpController.signUp();
                             }
                           },
-                          child: const Text(
+                          child: Text(
                             "Sign Up",
-                            style: TextStyle(color: Colors.white),
+                            style: TextStyle(color: secondarycolor),
                           ),
                         ),
                       )),
@@ -384,7 +305,8 @@ class _TabBarAndTabViewsState extends State<TabBarAndTabViews>
   Row buildNavigationButtons(
       {required int index, required GlobalKey<FormState> formKey}) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment:
+          index == 0 ? MainAxisAlignment.end : MainAxisAlignment.spaceBetween,
       children: [
         if (index > 0)
           ElevatedButton(
@@ -392,9 +314,9 @@ class _TabBarAndTabViewsState extends State<TabBarAndTabViews>
               tabController.animateTo(index - 1);
               setState(() {});
             },
-            child: const Text(
+            child: Text(
               'Previous',
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: secondarycolor),
             ),
           ),
         if (index != 2)
@@ -407,9 +329,9 @@ class _TabBarAndTabViewsState extends State<TabBarAndTabViews>
                 }
               }
             },
-            child: const Text(
+            child: Text(
               'Next',
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: secondarycolor),
             ),
           ),
       ],
@@ -426,14 +348,14 @@ class _TabBarAndTabViewsState extends State<TabBarAndTabViews>
             width: 20,
             decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: tabController.index == index
-                    ? const Color(0xFF00E0C2)
-                    : Colors.black),
+                color: tabController.index == index ? maincolor : Colors.black),
             child: Center(
               child: Text(
                 (index + 1).toString(),
-                style: const TextStyle(
-                    color: Colors.white,
+                style: TextStyle(
+                    color: tabController.index == index
+                        ? secondarycolor
+                        : Colors.white,
                     fontWeight: FontWeight.w700,
                     fontFamily: 'Montserrat'),
               ),
@@ -441,6 +363,101 @@ class _TabBarAndTabViewsState extends State<TabBarAndTabViews>
           ),
         ],
       ),
+    );
+  }
+}
+
+class PhoneNumberInput extends StatelessWidget {
+  const PhoneNumberInput({
+    super.key,
+    required this.textEditingController,
+    this.onChanged,
+  });
+
+  final TextEditingController textEditingController;
+  final void Function(String)? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Container(
+            height: 56.5,
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border(
+                  top: BorderSide(color: maincolor, width: 1),
+                  bottom: BorderSide(color: maincolor, width: 1),
+                  left: BorderSide(color: maincolor, width: 1),
+                  right: BorderSide(color: maincolor, width: 1),
+                )),
+            child: const Center(
+                child: Text(
+              '+251',
+              style:
+                  TextStyle(color: Colors.black, fontWeight: FontWeight.w400),
+            )),
+          ),
+        ),
+        const SizedBox(
+          width: 5,
+        ),
+        Expanded(
+          flex: 5,
+          child: TextFormField(
+            keyboardType: TextInputType.number,
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.digitsOnly
+            ],
+            controller: textEditingController,
+            decoration: InputDecoration(
+              hintText: '9XX-XXX-XXX',
+              hintStyle: const TextStyle(fontSize: 14),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: maincolor,
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: maincolor,
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: maincolor,
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              helperText: ' ',
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: maincolor,
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              errorStyle: const TextStyle(
+                  fontFamily: 'Montserrat', fontWeight: FontWeight.w400),
+            ),
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            validator: (value) {
+              if (value == null || value.length != 9) {
+                return 'Please enter exactly 9 digits';
+              }
+              return null;
+            },
+            onChanged: onChanged,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -469,7 +486,7 @@ Row buildFooter(BuildContext context) {
           style: TextStyle(
               color: maincolor,
               fontFamily: 'Montserrat',
-              fontWeight: FontWeight.w400)),
+              fontWeight: FontWeight.bold)),
     )
   ]);
 }

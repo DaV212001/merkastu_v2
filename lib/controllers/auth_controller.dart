@@ -4,6 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:logger/logger.dart';
 import 'package:merkastu_v2/config/dio_config.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -44,18 +45,21 @@ class SignUpController extends GetxController {
   var verificationStatus = VerificationStatus.pending.obs;
   // Function to perform the sign-up action
   Future<void> signUp() async {
+    token.value = const Uuid().v4();
+
     isLoading.value = true;
     Map<String, dynamic> data = {
       "botToken": token.value,
-      "phoneNumber": phone.value,
-      "blockNumber": block.value,
-      "roomNumber": room.value,
+      "phoneNumber": '251${phone.value}',
+      "blockNumber": int.parse(block.value),
+      "roomNumber": int.parse(room.value),
       "email": email.value,
-      "password": password.value
+      "password": int.parse(password.value)
     };
     dio.Response response = dio.Response(requestOptions: dio.RequestOptions());
+    Logger().d(data);
     try {
-      response = await DioConfig.dio().get(
+      response = await DioConfig.dio().post(
         '/user/auth/sign-up',
         options: dio.Options(
           headers: {'Content-Type': 'application/json'},
@@ -66,7 +70,7 @@ class SignUpController extends GetxController {
       if ((response.statusCode == 201 || response.statusCode == 200) &&
           response.data['status'] == true) {
         Get.snackbar('Success', 'Sign-up completed!');
-        // Get.toNamed(Routes.phoneVerifyRoute);
+        Get.toNamed(Routes.phoneVerifyRoute);
       } else {
         throw Exception(response.data);
       }
@@ -97,7 +101,7 @@ class SignUpController extends GetxController {
         options: dio.Options(
           headers: {'Content-Type': 'application/json'},
         ),
-        data: jsonEncode({"phoneNumber": phone.value}),
+        data: jsonEncode({"botToken": token.value}),
       );
       Logger().d(response.data);
 
@@ -106,8 +110,7 @@ class SignUpController extends GetxController {
 
         if (data['token'] != null) {
           // User is verified
-          var userContrller = Get.find<UserController>();
-          userContrller.isLoggedIn.value = true;
+          UserController.isLoggedIn.value = true;
           verificationStatus.value = VerificationStatus.verified;
           ConfigPreference.setUserToken(data['token']);
           Get.offAllNamed(Routes.initialRoute);
@@ -129,7 +132,6 @@ class SignUpController extends GetxController {
   }
 
   void launchTelegram() async {
-    token.value = const Uuid().v4();
     String url = 'https://t.me/merkastubot?start=${token.value}';
     await launchUrl(
       Uri.parse(url),
@@ -169,7 +171,7 @@ class SignUpController extends GetxController {
 
 class LoginController extends GetxController {
   // Email and Password fields as observable variables
-  var email = ''.obs;
+  var phone = ''.obs;
   var password = ''.obs;
 
   // Loading state
@@ -182,19 +184,55 @@ class LoginController extends GetxController {
   Future<void> login() async {
     if (formKey.currentState!.validate()) {
       isLoading.value = true;
-
-      // Simulate a login process (you should replace this with actual login API call)
-      await Future.delayed(const Duration(seconds: 2));
+      dio.Response response =
+          dio.Response(requestOptions: dio.RequestOptions());
+      Map<String, dynamic> body = {
+        'phoneNumber': '251${phone.value}',
+        'userPassword': password.value,
+      };
+      try {
+        response = await DioConfig.dio()
+            .post('/user/auth/sign-in', data: jsonEncode(body));
+        Logger().d(response.data);
+        if ((response.statusCode == 201 || response.statusCode == 200) &&
+            response.data['status'] == true) {
+          final data = response.data['data'];
+          ConfigPreference.setUserToken(data['token']);
+          Get.snackbar('Success', 'Logged in successfully');
+          Get.offAllNamed(Routes.initialRoute);
+        } else {
+          throw Exception(response.data);
+        }
+      } catch (e, stack) {
+        Logger().t(e, stackTrace: stack);
+        String errorString = (await ErrorUtil.getErrorData(e.toString())).body;
+        if (errorString.startsWith('custom')) {
+          errorString = errorString.replaceFirst('custom', '');
+        }
+        var connectivityResult = await (Connectivity().checkConnectivity());
+        if (connectivityResult[0] == ConnectivityResult.none) {
+          errorString = 'No internet connection';
+        }
+        if (e is FormatException) {
+          errorString = 'Unexpected error occured, please try again';
+        }
+        Get.snackbar('Error', errorString);
+        isLoading.value = false;
+      }
       isLoading.value = false;
 
       // If login is successful
-      Get.snackbar('Success', 'Logged in successfully!',
-          backgroundColor: Colors.green);
+      Get.snackbar(
+        'Success',
+        'Logged in successfully!',
+      );
       // Navigate to home screen or the relevant screen
-      Get.toNamed('/home');
+      // Get.toNamed('/home');
     } else {
-      Get.snackbar('Error', 'Please fill in all fields correctly',
-          backgroundColor: Colors.red);
+      Get.snackbar(
+        'Error',
+        'Please fill in all fields correctly',
+      );
     }
   }
 
@@ -206,6 +244,52 @@ class LoginController extends GetxController {
 }
 
 class UserController extends GetxController {
-  var user = User().obs;
-  var isLoggedIn = false.obs;
+  static Rx<User> user = User().obs;
+  static RxBool isLoggedIn = false.obs;
+
+  static getLoggedInUser() {
+    User userTemp = User();
+    bool status = ConfigPreference.getUserToken() != null;
+    print("Logged in status = $status");
+    if (status == true) {
+      final accessToken = ConfigPreference.getUserToken();
+
+      Map<String, dynamic> decodedToken = JwtDecoder.decode(accessToken!);
+
+      print('ACCESS TOKEN FETCH LOGGED IN USER: $accessToken');
+      final user = User.fromJson(decodedToken, accessToken);
+      // String blue = '\u001b[34m'; // ANSI code for blue
+      // String reset = '\u001b[0m'; // Reset ANSI code
+      // print('${blue} ${user.toString()} ${reset}');
+      userTemp = user;
+    } else {
+      isLoggedIn.value = false;
+    }
+    user.value = userTemp;
+  }
+
+  static RxDouble walletBallance = 0.00.obs;
+  static var loadingBalance = false.obs;
+  static getWalletBallance() async {
+    loadingBalance.value = true;
+    dio.Response response = dio.Response(requestOptions: dio.RequestOptions());
+    try {
+      response = await DioConfig.dio().get('/user/wallet');
+      if (response.statusCode == 200 && response.data['status'] == true) {
+        walletBallance.value =
+            (response.data['data']['balance'] ?? 0).toDouble();
+      } else {
+        Exception(response.data['message']);
+      }
+      loadingBalance.value = false;
+    } catch (e, stack) {
+      loadingBalance.value = false;
+      Logger().t(e, stackTrace: stack);
+      Get.showSnackbar(const GetSnackBar(
+        title: 'Error',
+        message: 'Couldn\'t get wallet balance',
+        duration: Duration(milliseconds: 1500),
+      ));
+    }
+  }
 }

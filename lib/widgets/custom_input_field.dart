@@ -2,30 +2,32 @@ import 'package:flutter/material.dart';
 
 import '../constants/constants.dart';
 
-class EmailInput extends StatefulWidget {
+class CustomInputField extends StatelessWidget {
   final TextEditingController inputController;
-  final GlobalKey<FormState>? formKey;
-
+  final String hintText;
+  final Color primaryColor;
+  final String? Function(String?)? validator;
   final Function(dynamic val) onChanged;
-
-  const EmailInput(
+  final TextInputType? keyboardType;
+  const CustomInputField(
       {super.key,
       required this.inputController,
-      this.formKey,
-      required this.onChanged});
-  @override
-  EmailInputFb1State createState() => EmailInputFb1State();
-}
+      required this.hintText,
+      this.primaryColor = const Color(0xFF3AE0C4),
+      required this.onChanged,
+      this.validator,
+      this.keyboardType});
 
-class EmailInputFb1State extends State<EmailInput> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      controller: widget.inputController,
+      controller: inputController,
+      onChanged: onChanged,
       keyboardType: TextInputType.emailAddress,
+      style: const TextStyle(fontSize: 14, color: Colors.black),
       decoration: InputDecoration(
-        hintText: 'Enter your email',
-        hintStyle: TextStyle(color: Colors.grey.withOpacity(.75), fontSize: 14),
+        hintText: hintText,
+        hintStyle: const TextStyle(fontSize: 14),
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(
             color: maincolor,
@@ -55,21 +57,9 @@ class EmailInputFb1State extends State<EmailInput> {
           borderRadius: BorderRadius.circular(12.0),
         ),
         errorStyle: const TextStyle(
-          fontFamily: 'Montserrat',
-          fontWeight: FontWeight.w400,
-        ),
+            fontFamily: 'Montserrat', fontWeight: FontWeight.w400),
       ),
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      onChanged: widget.onChanged,
-      validator: (value) {
-        if (value!.isEmpty) {
-          return 'Please enter an email';
-        } else if (!RegExp(r'^[a-z]+\.[a-z]+@aastustudent\.edu\.et$')
-            .hasMatch(value)) {
-          return 'Please enter a valid AASTU email address\n(firstname.lastname@aastustudent.edu.et)';
-        }
-        return null;
-      },
+      validator: validator,
     );
   }
 }
