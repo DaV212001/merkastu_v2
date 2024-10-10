@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:merkastu_v2/constants/constants.dart';
 import 'package:merkastu_v2/widgets/cached_image_widget_wrapper.dart';
@@ -87,9 +88,17 @@ class StoreCard extends StatelessWidget {
                     const SizedBox(
                       width: 5,
                     ),
-                    Text(
-                      location,
-                      style: Theme.of(context).textTheme.bodySmall,
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      child: AutoSizeText(
+                        location,
+                        maxLines: 2,
+                        minFontSize: 12,
+                        maxFontSize: 14,
+                        stepGranularity: 0.5,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                     ),
                   ],
                 ),
@@ -157,5 +166,22 @@ class SmallCardImageHolder extends StatelessWidget {
       ),
       child: image,
     );
+  }
+}
+
+class CircularImageHolder extends StatelessWidget {
+  const CircularImageHolder({
+    super.key,
+    required this.image,
+  });
+
+  final Image image;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        decoration: const BoxDecoration(shape: BoxShape.circle),
+        child:
+            ClipRRect(borderRadius: BorderRadius.circular(100), child: image));
   }
 }

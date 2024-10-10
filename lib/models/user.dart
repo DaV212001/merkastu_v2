@@ -6,9 +6,11 @@ class User {
   final int? phone;
   final int? block;
   final int? room;
+  final String? telegramId;
   final String? accessToken;
 
   User({
+    this.telegramId,
     this.accessToken,
     this.id,
     this.firstName,
@@ -36,10 +38,10 @@ class User {
         id: json['id'],
         firstName: json['first_name'],
         lastName: json['last_name'],
-        email: json['email'],
-        phone: json['phone'],
-        block: json['block'],
-        room: json['room'],
+        email: json['student_email'],
+        phone: int.parse(json['phone_number']),
+        block: json['block_number'],
+        room: json['room_number'],
         accessToken: accessToken);
   }
 }

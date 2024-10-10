@@ -53,7 +53,7 @@ class ShimmeringStoreCard extends StatelessWidget {
                     baseColor: maincolor.withOpacity(0.4),
                     highlightColor: Colors.grey[100]!,
                     child: Container(
-                      width: 150,
+                      width: 80,
                       height: 20,
                       color: Colors.grey[300],
                     ),
@@ -67,7 +67,7 @@ class ShimmeringStoreCard extends StatelessWidget {
                         baseColor: maincolor.withOpacity(0.4),
                         highlightColor: Colors.grey[100]!,
                         child: Container(
-                          width: 100,
+                          width: 150,
                           height: 15,
                           color: Colors.grey[300],
                         ),

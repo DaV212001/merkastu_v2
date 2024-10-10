@@ -53,7 +53,8 @@ class SignUpController extends GetxController {
       "phoneNumber": '251${phone.value}',
       "blockNumber": int.parse(block.value),
       "roomNumber": int.parse(room.value),
-      "email": email.value,
+      "firstName": firstName.value,
+      "lastName": lastName.value,
       "password": int.parse(password.value)
     };
     dio.Response response = dio.Response(requestOptions: dio.RequestOptions());
@@ -143,7 +144,7 @@ class SignUpController extends GetxController {
   bool validateFieldsForTab(int index) {
     switch (index) {
       case 0:
-        if (firstName.isEmpty || lastName.isEmpty || phone.isEmpty) {
+        if (firstName.isEmpty || lastName.isEmpty) {
           Get.snackbar('Error', 'Please fill in all fields',
               backgroundColor: Colors.red);
           return false;
@@ -201,7 +202,7 @@ class LoginController extends GetxController {
           Get.snackbar('Success', 'Logged in successfully');
           Get.offAllNamed(Routes.initialRoute);
         } else {
-          throw Exception(response.data);
+          throw 'custom' + response.data['message'];
         }
       } catch (e, stack) {
         Logger().t(e, stackTrace: stack);
@@ -220,12 +221,6 @@ class LoginController extends GetxController {
         isLoading.value = false;
       }
       isLoading.value = false;
-
-      // If login is successful
-      Get.snackbar(
-        'Success',
-        'Logged in successfully!',
-      );
       // Navigate to home screen or the relevant screen
       // Get.toNamed('/home');
     } else {
@@ -256,7 +251,7 @@ class UserController extends GetxController {
 
       Map<String, dynamic> decodedToken = JwtDecoder.decode(accessToken!);
 
-      print('ACCESS TOKEN FETCH LOGGED IN USER: $accessToken');
+      print('ACCESS TOKEN FETCH LOGGED IN USER: $decodedToken');
       final user = User.fromJson(decodedToken, accessToken);
       // String blue = '\u001b[34m'; // ANSI code for blue
       // String reset = '\u001b[0m'; // Reset ANSI code

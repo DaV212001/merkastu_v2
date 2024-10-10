@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import '../../constants/constants.dart';
 import '../../controllers/auth_controller.dart';
 import '../../widgets/custom_input_field.dart';
-import '../../widgets/email_input_field.dart';
 import '../../widgets/loading_animated_button.dart';
 import '../../widgets/password_input_field.dart';
 import 'log_in_screen.dart';
@@ -127,22 +126,6 @@ class _TabBarAndTabViewsState extends State<TabBarAndTabViews>
                 onChanged: (val) => signUpController.lastName.value = val,
               ),
               const SizedBox(height: 16.0),
-              const Text(
-                'Please enter a phone number associated with your Telegram account',
-                softWrap: true,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.black54),
-              ),
-              const SizedBox(
-                height: 5,
-              ),
-              PhoneNumberInput(
-                textEditingController:
-                    TextEditingController(text: signUpController.phone.value),
-                onChanged: (val) => signUpController.phone.value = val,
-              ),
               const Divider(
                 indent: 30,
                 endIndent: 30,
@@ -242,12 +225,22 @@ class _TabBarAndTabViewsState extends State<TabBarAndTabViews>
                   ),
                   child: SvgPicture.asset('assets/images/login.svg'),
                 ),
-                EmailInput(
-                  inputController:
-                      TextEditingController(text: signUpController.email.value),
-                  onChanged: (val) => signUpController.email.value = val,
+                const Text(
+                  'Please enter a phone number associated with your Telegram account',
+                  softWrap: true,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.black54),
                 ),
-                const SizedBox(height: 16.0),
+                const SizedBox(
+                  height: 5,
+                ),
+                PhoneNumberInput(
+                  textEditingController:
+                      TextEditingController(text: signUpController.phone.value),
+                  onChanged: (val) => signUpController.phone.value = val,
+                ),
                 PasswordInput(
                   textEditingController: TextEditingController(
                       text: signUpController.password.value),

@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:merkastu_v2/constants/constants.dart';
 
-import '../controllers/home_controller.dart';
+import '../../controllers/home_controller.dart';
+import '../../utils/payment_methods.dart';
 
 class PaymentMethodSelection extends StatefulWidget {
   final Function(PaymentMethod) onMethodSelected;
@@ -21,15 +22,15 @@ class PaymentMethodSelection extends StatefulWidget {
 
 class _PaymentMethodSelectionState extends State<PaymentMethodSelection> {
   final HomeController homeController = Get.find<HomeController>(tag: 'home');
-  PaymentMethod _selectedMethod = PaymentMethod.NONE;
+  PaymentMethod _selectedMethod = PaymentMethod.none;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: PaymentMethod.values
-          .where((method) => method != PaymentMethod.NONE)
+          .where((method) => method != PaymentMethod.none)
           .map((method) {
-        bool isWalletMethod = method == PaymentMethod.WALLET;
+        bool isWalletMethod = method == PaymentMethod.wallet;
         bool isWalletDisabled = isWalletMethod && widget.walletInsufficient;
 
         return Padding(

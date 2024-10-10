@@ -48,9 +48,6 @@ class Pages {
     GetPage(
       name: Routes.initialRoute,
       page: () => const MainLayoutScreen(),
-      middlewares: [
-        InitialNavigationMiddleware(),
-      ],
     ),
     /////////////////////////////////
     //auth
@@ -78,6 +75,9 @@ class Pages {
     GetPage(
       name: Routes.favoritesRoute,
       page: () => const FavoritesScreen(),
+      middlewares: [
+        InitialNavigationMiddleware(),
+      ],
     ),
     //////////////////////////////////
     //home
@@ -94,10 +94,16 @@ class Pages {
     GetPage(
       name: Routes.checkoutRoute,
       page: () => CheckOutScreen(),
+      middlewares: [
+        InitialNavigationMiddleware(),
+      ],
     ),
     GetPage(
       name: Routes.ordersHistoryRoute,
       page: () => const OrderHistoryScreen(),
+      middlewares: [
+        InitialNavigationMiddleware(),
+      ],
     ),
     GetPage(
       name: Routes.cartRoute,
@@ -128,6 +134,9 @@ class Pages {
     GetPage(
       name: Routes.profileRoute,
       page: () => const ProfileScreen(),
+      middlewares: [
+        InitialNavigationMiddleware(),
+      ],
     ),
     GetPage(
       name: Routes.settingsRoute,

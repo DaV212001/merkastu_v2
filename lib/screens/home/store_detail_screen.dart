@@ -74,7 +74,12 @@ class StoreDetailScreen extends StatelessWidget {
                                                   .productCategoryList[index].id
                                           ? maincolor
                                           : Colors.grey,
-                                      width: 1,
+                                      width: homeController
+                                                  .selectedCategory.value.id ==
+                                              homeController
+                                                  .productCategoryList[index].id
+                                          ? 2
+                                          : 1,
                                     ),
                                     borderRadius: BorderRadius.circular(
                                       5,
@@ -93,6 +98,25 @@ class StoreDetailScreen extends StatelessWidget {
                                       maxFontSize: 12,
                                       stepGranularity: 0.5,
                                       overflow: TextOverflow.visible,
+                                      style: TextStyle(
+                                          color: homeController.selectedCategory
+                                                      .value.id ==
+                                                  homeController
+                                                      .productCategoryList[
+                                                          index]
+                                                      .id
+                                              ? maincolor
+                                              : null,
+                                          fontWeight: homeController
+                                                      .selectedCategory
+                                                      .value
+                                                      .id ==
+                                                  homeController
+                                                      .productCategoryList[
+                                                          index]
+                                                      .id
+                                              ? FontWeight.bold
+                                              : null),
                                     ),
                                   ),
                                 ),

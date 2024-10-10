@@ -1,18 +1,39 @@
-import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:merkastu_v2/components/payment_method_selection.dart';
 import 'package:merkastu_v2/constants/constants.dart';
-import 'package:merkastu_v2/controllers/auth_controller.dart';
 import 'package:merkastu_v2/controllers/home_controller.dart';
 import 'package:merkastu_v2/models/product.dart';
+import 'package:merkastu_v2/utils/error_data.dart';
+import 'package:merkastu_v2/utils/payment_methods.dart';
+import 'package:merkastu_v2/widgets/custom_input_field.dart';
 
-import '../../models/store.dart';
-import '../../widgets/loading.dart';
-import '../../widgets/product_check_out_card.dart';
+import '../../components/order/order_tab.dart';
+import '../../constants/assets.dart';
+import '../../widgets/error_card.dart';
+import '../../widgets/wallet_balance.dart';
 
-class CheckOutScreen extends StatelessWidget {
+class CheckOutScreen extends StatefulWidget {
   CheckOutScreen({super.key});
+
+  @override
+  State<CheckOutScreen> createState() => _CheckOutScreenState();
+}
+
+class _CheckOutScreenState extends State<CheckOutScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +75,7 @@ class CheckOutScreen extends StatelessWidget {
     grandTotal = subTotalPrice + deliveryCharge;
 
     // Calculate the service charge as 10% of the grand total
-    serviceCharge = grandTotal * 0.10;
+    serviceCharge = (grandTotal * 0.15);
 
     // Add service charge to the grand total
     grandTotal += serviceCharge;
@@ -64,288 +85,144 @@ class CheckOutScreen extends StatelessWidget {
         title: const Text(
           "Checkout",
         ),
-        // backgroundColor: secondarycolor,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-                decoration: BoxDecoration(
-                  color: maincolor,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Obx(
-                    () => UserController.loadingBalance.value
-                        ? const Loading(
-                            color: Colors.white,
-                            size: 40,
-                          )
-                        : Row(
-                            children: [
-                              const Icon(
-                                EneftyIcons.wallet_2_bold,
-                                color: Colors.white,
-                              ),
-                              const SizedBox(
-                                width: 5,
-                              ),
-                              Text(
-                                UserController.walletBallance.value.toString(),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white),
-                              )
-                            ],
-                          ),
-                  ),
-                )),
-          )
-        ],
+        actions: const [WalletBalance()],
       ),
-      // backgroundColor: secondarycolor,
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            const Padding(
-              padding: EdgeInsets.only(top: 8.0, left: 16.0),
-              child: Text(
-                'Order summary',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+      body: Column(
+        children: [
+          TabBar(
+            controller: _tabController,
+            tabs: const [
+              Tab(text: 'Order'),
+              Tab(text: 'Payment'),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                Order(
+                  tabController: _tabController,
+                  groupedProducts: groupedProducts,
+                  homeController: homeController,
+                  subTotalPrice: subTotalPrice,
+                  deliveryCharge: deliveryCharge,
+                  serviceCharge: serviceCharge,
+                  grandTotal: grandTotal,
                 ),
-              ),
-            ),
-            Flexible(
-              fit: FlexFit.loose,
-              child: Padding(
-                padding: const EdgeInsets.only(
-                    left: 16.0, right: 16.0, bottom: 16.0),
-                child: ListView.builder(
-                  itemCount: groupedProducts.keys.length,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, storeIndex) {
-                    String storeId = groupedProducts.keys.elementAt(storeIndex);
-                    Store store = homeController.storeList
-                        .firstWhere((store) => store.id == storeId);
-                    List<Product> storeProducts = groupedProducts[storeId]!;
-                    double storeTotalPrice = storeProducts.fold(
-                        0,
-                        (sum, product) =>
-                            sum + num.parse(product.totalPrice()));
-
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Theme(
-                        data: Theme.of(context)
-                            .copyWith(dividerColor: Colors.transparent),
-                        child: ExpansionTile(
-                          expandedCrossAxisAlignment: CrossAxisAlignment.start,
-                          // backgroundColor: maincolor.withOpacity(0.3),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(7),
-                              side: BorderSide(color: maincolor)),
-                          collapsedBackgroundColor: maincolor.withOpacity(0.2),
-                          collapsedShape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(7)),
-                          initiallyExpanded: true,
-                          childrenPadding:
-                              const EdgeInsets.only(left: 16.0, bottom: 16.0),
-                          title: Text(
-                            (homeController.storeNameById(storeId) ??
-                                    "Unknown Store")
-                                .trim(),
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: maincolor),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Total: ${storeTotalPrice + double.parse(homeController.calculateStoreDeliveryFee(storeId))} Birr",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w500,
+                SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Obx(
+                        () => homeController.selectedPaymentPlan.value ==
+                                    PaymentMethod.none ||
+                                homeController.orderId.value == ''
+                            ? Center(
+                                child: ErrorCard(
+                                  errorData: ErrorData(
+                                      title: 'No payment method',
+                                      body:
+                                          'Please select a payment method and place your order.',
+                                      buttonText: 'Go back',
+                                      image: Assets.errorsNotVerified),
+                                  refresh: () => _tabController.animateTo(0),
                                 ),
-                              ),
-                            ],
-                          ),
-                          children: [
-                            const Divider(),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16.0),
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: storeProducts.length,
-                                itemBuilder: (context, index) {
-                                  Product product = storeProducts[index];
-                                  return ProductCheckOutCard(product: product);
-                                },
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 8.0),
-                              child: Text(
-                                  'Delivery fee for this store: ${store.deliveryFee} Birr'),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 8.0),
-                              child: Row(
+                              )
+                            : Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Text(
-                                      'Delivery charge: ${homeController.calculateStoreDeliveryFee(storeId)} Birr'),
+                                  const SizedBox(
+                                    height: 20,
+                                  ),
+                                  homeController
+                                      .selectedPaymentPlan.value.cover,
+                                  const SizedBox(
+                                    height: 20,
+                                  ),
                                   Padding(
-                                    padding: const EdgeInsets.only(left: 4.0),
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            var numberOfProductsFromStoreInCart =
-                                                homeController
-                                                    .calculateTotalQuantityOfProductsFromSpecificStore(
-                                                        storeId);
-                                            var numberOfBatches =
-                                                (numberOfProductsFromStoreInCart /
-                                                        3)
-                                                    .ceil();
-                                            return AlertDialog(
-                                              title: const Text(
-                                                  "Delivery Charge Info"),
-                                              content: Text(
-                                                "The delivery fee is charged for every batch of 3 products in your cart. In this case, ${store.deliveryFee} Birr per batch from this store. You have a total of $numberOfProductsFromStoreInCart ${numberOfProductsFromStoreInCart > 1 ? 'products' : 'product'} from ${store.name} in your cart, which amounts to $numberOfBatches ${numberOfBatches > 1 ? 'batches' : 'batch'}, and thus you are charged with ${homeController.calculateStoreDeliveryFee(storeId)} Birr ",
-                                              ),
-                                              actions: [
-                                                TextButton(
-                                                  child: const Text("OK"),
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
-                                      },
-                                      child: Icon(
-                                        Icons.info_outline,
-                                        color: maincolor,
-                                      ),
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            const Text(
+                                              'Name:',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            Text(
+                                              'Amanuel Wonde',
+                                              style: TextStyle(
+                                                  color: maincolor,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            const Text(
+                                              'Account:',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            Text(
+                                              homeController.selectedPaymentPlan
+                                                  .value.accountNumber,
+                                              style: TextStyle(
+                                                  color: maincolor,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
                                   ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      children: [
+                                        const Text(
+                                          'Please make a payment to the account listed above and paste the transaction/reference ID below',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        const SizedBox(
+                                          height: 20,
+                                        ),
+                                        CustomInputField(
+                                          inputController:
+                                              TextEditingController(
+                                            text: homeController
+                                                .transactionId.value,
+                                          ),
+                                          label: 'Transaction ID',
+                                          hintText:
+                                              'Enter your transaction/reference ID',
+                                          onChanged: (value) {
+                                            homeController.transactionId.value =
+                                                value;
+                                          },
+                                        )
+                                      ],
+                                    ),
+                                  )
                                 ],
                               ),
-                            ),
-                          ],
-                        ),
                       ),
-                    );
-                  },
-                ),
-              ),
+                    ],
+                  ),
+                )
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Subtotal: $subTotalPrice Birr",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text("Total delivery charge: $deliveryCharge Birr"),
-                    Row(
-                      children: [
-                        Text("Service Charge: $serviceCharge Birr"),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 4.0),
-                          child: GestureDetector(
-                            onTap: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: const Text("Service Charge Info"),
-                                    content: const Text(
-                                      "The service charge is 10% of the subtotal + delivery charges.",
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        child: const Text("OK"),
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                            child: Icon(
-                              Icons.info_outline,
-                              color: maincolor,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      "Total: $grandTotal Birr",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    const Text(
-                      "Select a payment method",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    PaymentMethodSelection(
-                        walletInsufficient:
-                            UserController.walletBallance.value < grandTotal,
-                        onMethodSelected: (paymentMethod) {
-                          homeController.selectedPaymentPlan.value =
-                              paymentMethod;
-                        }),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 60,
-                      child: Obx(
-                        () => ElevatedButton(
-                          onPressed: homeController.selectedPaymentPlan.value ==
-                                  PaymentMethod.NONE
-                              ? null
-                              : () => homeController.placeOrder(),
-                          style: ElevatedButton.styleFrom(
-                              disabledBackgroundColor: Colors.grey,
-                              disabledForegroundColor: maincolor),
-                          child: const Text(
-                            'Place Order',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16),
-                          ),
-                        ),
-                      ),
-                    )
-                  ]),
-            )
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

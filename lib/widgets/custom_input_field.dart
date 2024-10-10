@@ -5,6 +5,8 @@ import '../constants/constants.dart';
 class CustomInputField extends StatelessWidget {
   final TextEditingController inputController;
   final String hintText;
+  final String? initialValue;
+  final String? label;
   final Color primaryColor;
   final String? Function(String?)? validator;
   final Function(dynamic val) onChanged;
@@ -16,17 +18,22 @@ class CustomInputField extends StatelessWidget {
       this.primaryColor = const Color(0xFF3AE0C4),
       required this.onChanged,
       this.validator,
-      this.keyboardType});
+      this.keyboardType,
+      this.initialValue,
+      this.label});
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       controller: inputController,
       onChanged: onChanged,
-      keyboardType: TextInputType.emailAddress,
+      keyboardType: keyboardType,
+      initialValue: initialValue,
       style: const TextStyle(fontSize: 14, color: Colors.black),
       decoration: InputDecoration(
         hintText: hintText,
+        labelText: label,
+        labelStyle: TextStyle(color: maincolor),
         hintStyle: const TextStyle(fontSize: 14),
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(

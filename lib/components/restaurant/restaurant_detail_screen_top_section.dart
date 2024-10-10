@@ -68,13 +68,15 @@ class RestaurantDetailScreenTopSection extends StatelessWidget {
               placeholderBuilder: (context, path) => Container(
                 width: 50,
                 height: 50,
-                decoration: const BoxDecoration(
-                  // color: maincolor,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.3),
                   shape: BoxShape.circle,
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(100),
-                  child: const Loading(),
+                  child: const Loading(
+                    size: 40,
+                  ),
                 ),
               ),
               errorWidgetBuilder: (context, path, object) => Container(

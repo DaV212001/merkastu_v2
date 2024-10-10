@@ -114,7 +114,11 @@ class RestaurantListTopSection extends StatelessWidget {
                                                   index
                                               ? maincolor
                                               : Colors.grey,
-                                      width: 1,
+                                      width:
+                                          homeController.selectedIndex.value ==
+                                                  index
+                                              ? 2
+                                              : 1,
                                     ),
                                     borderRadius: BorderRadius.circular(
                                       5,
