@@ -3,11 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:merkastu_v2/constants/constants.dart';
+import 'package:merkastu_v2/constants/pages.dart';
 import 'package:merkastu_v2/controllers/auth_controller.dart';
+import 'package:merkastu_v2/controllers/main_layout_controller.dart';
+import 'package:merkastu_v2/controllers/order_controller.dart';
 import 'package:merkastu_v2/utils/api_call_status.dart';
 import 'package:merkastu_v2/utils/error_data.dart';
 import 'package:merkastu_v2/utils/error_utils.dart';
-import 'package:merkastu_v2/widgets/animated_undo_button.dart';
+import 'package:merkastu_v2/widgets/animated_widgets/animated_undo_button.dart';
 
 import '../config/dio_config.dart';
 import '../config/storage_config.dart';
@@ -62,20 +65,38 @@ class HomeController extends GetxController {
         .toList();
   }
 
+  List<String> savedStoresId = [];
+  List<String> savedProductsId = [];
+
   void fetchStores() async {
     storeLoadingStatus.value = ApiCallStatus.loading;
     storeLoadingErrorData.value = ErrorData(title: '', body: '', image: '');
     selectedIndex.value = 0;
     dio.Response response;
     try {
-      response = await DioConfig.dio().get('/store/get-stores');
+      var path = UserController.isLoggedIn.value
+          ? '/user/store?userId=${UserController.user.value.id}'
+          : '/user/store';
+      Logger().d(path);
+      response = await DioConfig.dio().get(
+        path,
+      );
       Logger().d(response.data);
       if (response.statusCode == 200 && response.data['status'] == true) {
-        storeList = (response.data['data'] as List)
+        storeList = (response.data['data']['stores'] as List)
             .map((e) => Store.fromJson(e))
             .toList()
             .obs;
+        savedStoresId = (response.data['data']['savedStores'] as List)
+            .map((e) => e.toString())
+            .toList();
+        for (Store store in storeList) {
+          if (savedStoresId.contains(store.id)) {
+            store.favorited = true;
+          }
+        }
         filteredStoreList.value = List.from(storeList);
+
         storeLoadingStatus.value = ApiCallStatus.success;
       } else {
         throw Exception(response.data);
@@ -85,6 +106,132 @@ class HomeController extends GetxController {
       storeLoadingStatus.value = ApiCallStatus.error;
       storeLoadingErrorData.value = await ErrorUtil.getErrorData(e.toString());
     }
+  }
+
+  void favoriteStore(Store store) async {
+    if (!ConfigPreference.isUserLoggedIn()) {
+      Get.toNamed(Routes.loginPromptRoute);
+      return;
+    }
+    store.favorited = true;
+    filteredStoreList.refresh();
+    dio.Response response;
+    try {
+      response = await DioConfig.dio().post('/user/store/save',
+          data: {'store_id': store.id},
+          options: dio.Options(
+            headers: {
+              'Authorization': ConfigPreference.getUserToken(),
+            },
+          ));
+      Logger().d(response.data);
+      if ((response.statusCode == 200 || response.statusCode == 201) &&
+          response.data['status'] == true) {
+        store.favorited = true;
+      } else {
+        store.favorited = false;
+        throw Exception(response.data);
+      }
+    } catch (e, stack) {
+      Logger().t(e, stackTrace: stack);
+      store.favorited = false;
+      Get.snackbar('Error', 'Couldn\'t favorite store');
+    }
+    filteredStoreList.refresh();
+  }
+
+  void unfavoriteStore(Store store) async {
+    if (!ConfigPreference.isUserLoggedIn()) {
+      Get.toNamed(Routes.loginPromptRoute);
+      return;
+    }
+    store.favorited = false;
+    filteredStoreList.refresh();
+    dio.Response response;
+    try {
+      response = await DioConfig.dio().put('/user/store/unsave',
+          data: {'store_id': store.id},
+          options: dio.Options(
+            headers: {
+              'Authorization': ConfigPreference.getUserToken(),
+            },
+          ));
+      Logger().d(response.data);
+      if (response.statusCode == 200 && response.data['status'] == true) {
+        store.favorited = false;
+      } else {
+        store.favorited = true;
+        throw Exception(response.data);
+      }
+    } catch (e, stack) {
+      Logger().t(e, stackTrace: stack);
+      store.favorited = true;
+      Get.snackbar('Error', 'Couldn\'t unfavorite store');
+    }
+    filteredStoreList.refresh();
+  }
+
+  void favoriteProduct(Product product) async {
+    if (!ConfigPreference.isUserLoggedIn()) {
+      Get.toNamed(Routes.loginPromptRoute);
+      return;
+    }
+    product.favorited = true;
+    filteredProductList.refresh();
+    dio.Response response;
+    try {
+      response = await DioConfig.dio().post('/user/product/save',
+          data: {'product_id': product.id},
+          options: dio.Options(
+            headers: {
+              'Authorization': ConfigPreference.getUserToken(),
+            },
+          ));
+      Logger().d(response.data);
+      if ((response.statusCode == 200 || response.statusCode == 201) &&
+          response.data['status'] == true) {
+        product.favorited = true;
+      } else {
+        product.favorited = false;
+        throw Exception(response.data);
+      }
+    } catch (e, stack) {
+      Logger().t(e, stackTrace: stack);
+      product.favorited = false;
+      Get.snackbar('Error', 'Couldn\'t favorite product');
+    }
+    filteredProductList.refresh();
+  }
+
+  void unfavoriteProduct(Product product) async {
+    if (!ConfigPreference.isUserLoggedIn()) {
+      Get.toNamed(Routes.loginPromptRoute);
+      return;
+    }
+    product.favorited = false;
+    filteredProductList.refresh();
+    dio.Response response;
+    try {
+      response = await DioConfig.dio().put('/user/product/unsave',
+          data: {'product_id': product.id},
+          options: dio.Options(
+            headers: {
+              'Authorization': ConfigPreference.getUserToken(),
+            },
+          ));
+      Logger().d(response.data);
+      if (response.statusCode == 200 && response.data['status'] == true) {
+        product.favorited = false;
+      } else {
+        product.favorited = true;
+        throw Exception(response.data);
+      }
+    } catch (e, stack) {
+      Logger().t(e, stackTrace: stack);
+      product.favorited = true;
+      Get.snackbar('Error', 'Couldn\'t unfavorite product');
+    }
+    filteredProductList.refresh();
   }
 
   void searchForProducts(String query) {
@@ -117,19 +264,30 @@ class HomeController extends GetxController {
     dio.Response response;
     Logger().d('/store/get-store/${selectedStore.value.id}');
     try {
+      var path = UserController.isLoggedIn.value
+          ? '/user/store/${selectedStore.value.id}?userId=${UserController.user.value.id}'
+          : '/user/store/${selectedStore.value.id}';
       response = await DioConfig.dio().get(
-        '/store/get-store/${selectedStore.value.id}',
+        path,
       );
       Logger().d(response.data);
       if (response.statusCode == 200 && response.data['status'] == true) {
-        productList = (response.data['data']['product'] as List)
+        productList = (response.data['data']['store']['product'] as List)
             .map((e) => Product.fromJson(e))
             .toList()
             .obs;
         productCategoryList.value =
-            (response.data['data']['ProductCategories'] as List)
+            (response.data['data']['store']['ProductCategories'] as List)
                 .map((e) => ProductCategory.fromJson(e))
                 .toList();
+        savedProductsId = (response.data['data']['savedProducts'] as List)
+            .map((e) => e.toString())
+            .toList();
+        for (Product product in productList) {
+          if (savedProductsId.contains(product.id)) {
+            product.favorited = true;
+          }
+        }
         productCategoryList.insert(0, ProductCategory(id: 'all'));
         filteredProductList.value = List.from(productList);
         productLoadingStatus.value = ApiCallStatus.success;
@@ -239,14 +397,15 @@ class HomeController extends GetxController {
     return storeList.firstWhere((store) => store.id == storeId).name;
   }
 
-  var block = int.parse((UserController.user.value.block ?? 0).toString()).obs;
-  var room = int.parse((UserController.user.value.room ?? 0).toString()).obs;
+  var block = (UserController.user.value.block ?? 0).toString().obs;
+  var room = (UserController.user.value.room ?? 0).toString().obs;
 
   var transactionId = ''.obs;
   var orderId = ''.obs;
 
   var placingOrder = ApiCallStatus.holding.obs;
   void placeOrder({required TabController tabController}) async {
+    UserController.getLoggedInUser();
     Map<String, dynamic> body = {
       "order": groupCartItemsByStore().entries.map((entry) {
         String storeId = entry.key;
@@ -277,9 +436,9 @@ class HomeController extends GetxController {
           }).toList(),
         };
       }).toList(),
-      if (block.value != int.parse(UserController.user.value.block.toString()))
+      if (block.value != UserController.user.value.block.toString())
         "deliveryBlock": block.value,
-      if (room.value != int.parse(UserController.user.value.room.toString()))
+      if (room.value != UserController.user.value.room.toString())
         "deliveryRoom": room.value,
       "paymentMethod": selectedPaymentPlan.value.name,
     };
@@ -287,6 +446,7 @@ class HomeController extends GetxController {
     // Logging the generated body
     Logger().i(body);
     dio.Response response = dio.Response(requestOptions: dio.RequestOptions());
+    print(ConfigPreference.getUserToken());
     try {
       placingOrder.value = ApiCallStatus.loading;
       response = await DioConfig.dio().post(
@@ -299,13 +459,38 @@ class HomeController extends GetxController {
           contentType: 'application/json',
         ),
       );
+      Logger().d(response.data);
       if ((response.statusCode == 201 || response.statusCode == 200) &&
           response.data['status']) {
-        Get.snackbar(
-            'Success', 'Order successfully placed! please pay for your order',
+        if (Get.isRegistered<OrderController>()) {
+          var orderControl = Get.find<OrderController>(tag: 'order');
+          orderControl.fetchActiveOrders();
+        } else {
+          var orderControl = Get.put(OrderController(), tag: 'order');
+          orderControl.fetchActiveOrders();
+        }
+        Get.snackbar('Success', 'Order successfully placed!',
             backgroundColor: maincolor, colorText: Colors.white);
-        orderId.value = response.data['order']['id'].toString();
-        tabController.animateTo(1);
+        orderId.value = response.data['data']['orderId'].toString();
+        if (selectedPaymentPlan.value == PaymentMethod.wallet) {
+          Get.offNamedUntil(Routes.initialRoute, (r) => true);
+          cart.clear();
+          itemsInCart.value = 0;
+          itemsInCart.refresh();
+          cart.refresh();
+          orderId.value = '';
+          transactionId.value = '';
+          selectedPaymentPlan.value = PaymentMethod.none;
+          UserController.getWalletBallance();
+          var mainControl = Get.find<MainLayoutController>(tag: 'main');
+          mainControl.controller.jumpToTab(3);
+          placingOrder.value = ApiCallStatus.holding;
+          return;
+        }
+
+        if (selectedPaymentPlan.value != PaymentMethod.wallet) {
+          tabController.animateTo(1);
+        }
       } else {
         throw Exception(response.data['message']);
       }
@@ -333,13 +518,33 @@ class HomeController extends GetxController {
           contentType: 'application/json',
         ),
       );
+      Logger().d(response.data);
       if ((response.statusCode == 201 || response.statusCode == 200) &&
           response.data['status']) {
+        cart.clear();
+        itemsInCart.value = 0;
+        itemsInCart.refresh();
+        cart.refresh();
+        orderId.value = '';
+        transactionId.value = '';
+        selectedPaymentPlan.value = PaymentMethod.none;
+
         Get.snackbar('Success', 'Payment successfully verified',
             backgroundColor: maincolor, colorText: Colors.white);
+        if (Get.isRegistered<OrderController>()) {
+          var orderControl = Get.find<OrderController>(tag: 'order');
+          orderControl.fetchActiveOrders();
+        } else {
+          var orderControl = Get.put(OrderController(), tag: 'order');
+          orderControl.fetchActiveOrders();
+        }
+        Get.offNamedUntil(Routes.initialRoute, (r) => true);
+        var mainControl = Get.find<MainLayoutController>(tag: 'main');
+        mainControl.controller.jumpToTab(3);
       } else {
         throw Exception(response.data['message']);
       }
+      placingOrder.value = ApiCallStatus.holding;
       verifyingPayment.value = false;
     } catch (e, stack) {
       Logger().t(e, stackTrace: stack);

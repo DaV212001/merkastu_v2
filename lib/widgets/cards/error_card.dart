@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:merkastu_v2/constants/constants.dart';
 
-import '../utils/error_data.dart';
+import '../../utils/error_data.dart';
 
 class ErrorCard extends StatelessWidget {
   final ErrorData errorData;
@@ -18,8 +17,8 @@ class ErrorCard extends StatelessWidget {
       children: [
         SvgPicture.asset(
           errorData.image,
-          width: MediaQuery.of(context).size.width * 0.5,
-          height: MediaQuery.of(context).size.width * 0.5,
+          width: MediaQuery.of(context).size.width * 0.4,
+          height: MediaQuery.of(context).size.width * 0.4,
         ),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
@@ -28,8 +27,8 @@ class ErrorCard extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
                 color: theme.colorScheme.primary,
-                fontSize: 20,
-                fontWeight: FontWeight.bold),
+                fontSize: 16,
+                fontWeight: FontWeight.w600),
           ),
         ),
         Padding(
@@ -39,8 +38,8 @@ class ErrorCard extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
                 color: theme.unselectedWidgetColor,
-                fontSize: 15,
-                fontWeight: FontWeight.bold),
+                fontSize: 11,
+                fontWeight: FontWeight.w600),
           ),
         ),
         const SizedBox(height: 10),
@@ -55,12 +54,12 @@ class ErrorCard extends StatelessWidget {
     }
     return SizedBox(
       width: 300,
-      height: 60,
+      height: 40,
       child: ElevatedButton(
         onPressed: refresh,
         child: Text(
           text,
-          style: TextStyle(color: secondarycolor, fontSize: 20),
+          style: const TextStyle(color: Colors.white, fontSize: 16),
         ),
       ),
     );

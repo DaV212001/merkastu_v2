@@ -26,8 +26,8 @@ class _AnimatedSearchBarState extends State<AnimatedSearchBar> {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 500),
-        width: isExpanded ? MediaQuery.of(context).size.width * 0.45 : 46.0,
-        height: 46.0,
+        width: isExpanded ? MediaQuery.of(context).size.width * 0.45 : 40.0,
+        height: 40.0,
         decoration: BoxDecoration(
           color: maincolor.withOpacity(0.3),
           borderRadius: BorderRadius.circular(15.0),

@@ -57,6 +57,10 @@ dependencies:
   shimmer: ^3.0.0
   jwt_decoder: ^2.0.1
   flutter_staggered_grid_view: ^0.7.0
+  intl: ^0.19.0
+  ionicons: ^0.2.2
+  flutter_animate: ^4.5.0
+  animated_toggle_switch: ^0.8.3
 
 dev_dependencies:
   flutter_test:
@@ -100,6 +104,23 @@ flutter:
     - family: Montserrat
       fonts:
         - asset: assets/fonts/montserrat/Montserrat-Regular.ttf
+          weight: 400  # Regular weight
+        - asset: assets/fonts/montserrat/Montserrat-Medium.ttf
+          weight: 500  # Medium weight
+#        - asset: assets/fonts/montserrat/Montserrat-Bold.ttf
+#          weight: 600  # Bold weight
+#        - asset: assets/fonts/montserrat/Montserrat-ExtraBold.ttf
+#          weight: 800  # Extra Bold weight
+        - asset: assets/fonts/montserrat/Montserrat-Light.ttf
+          weight: 300  # Light weight
+        - asset: assets/fonts/montserrat/Montserrat-Thin.ttf
+          weight: 100  # Thin weight
+#        - asset: assets/fonts/montserrat/Montserrat-SemiBold.ttf
+#          weight: 700  # Semi-Bold weight
+    - family: Mont
+      fonts:
+        - asset: assets/fonts/montserrat/Montserrat-ExtraBold.ttf
+          weight: 800  # Extra Bold weight
   #   - family: Trajan Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf

@@ -7,8 +7,8 @@ import 'package:merkastu_v2/constants/pages.dart';
 import 'package:merkastu_v2/controllers/auth_controller.dart';
 import 'package:merkastu_v2/controllers/home_controller.dart';
 import 'package:merkastu_v2/utils/error_data.dart';
-import 'package:merkastu_v2/widgets/cart_item_card.dart';
-import 'package:merkastu_v2/widgets/error_card.dart';
+import 'package:merkastu_v2/widgets/cards/cart_item_card.dart';
+import 'package:merkastu_v2/widgets/cards/error_card.dart';
 import 'package:merkastu_v2/widgets/product_detail_bottom_sheet.dart';
 
 import '../../models/product.dart';
@@ -21,7 +21,7 @@ class CartScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         leading: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(10.0),
           child: GestureDetector(
             onTap: () => Get.back(),
             child: Container(
@@ -29,12 +29,13 @@ class CartScreen extends StatelessWidget {
                 color: maincolor,
                 shape: BoxShape.circle,
               ),
-              child: Center(
+              child: const Center(
                   child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.all(4.0),
                 child: Icon(
                   Icons.arrow_back_ios_new_rounded,
-                  color: secondarycolor,
+                  color: Colors.white,
+                  size: 16,
                 ),
               )),
             ),
@@ -42,7 +43,7 @@ class CartScreen extends StatelessWidget {
         ),
         title: const Text(
           'My Cart',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.w600),
         ),
         actions: [
           Stack(
@@ -59,15 +60,15 @@ class CartScreen extends StatelessWidget {
                         child: SizedBox(
                           width: MediaQuery.of(context).size.width * 0.3,
                           child: AutoSizeText(
-                            'Total price: ETB ${homeController.totalProductPrice}',
+                            'Total: ETB ${homeController.totalProductPrice}',
                             maxLines: 1,
-                            minFontSize: 9,
-                            maxFontSize: 12,
+                            minFontSize: 5,
+                            maxFontSize: 10,
                             stepGranularity: 0.5,
                             overflow: TextOverflow.visible,
                             style: const TextStyle(
                                 color: Colors.white,
-                                fontWeight: FontWeight.bold),
+                                fontWeight: FontWeight.w600),
                           ),
                         ),
                       ),
@@ -106,13 +107,13 @@ class CartScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 8.0),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 8.0, horizontal: 8),
                               child: Text(
                                 '${homeController.storeNameById(storeId)}', // Assuming you have a method to get store name
                                 style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
                                 ),
                               ),
                             ),
@@ -175,21 +176,21 @@ class CartScreen extends StatelessWidget {
           Obx(() => homeController.cart.isEmpty
               ? const SizedBox.shrink()
               : Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: SizedBox(
                     width: double.infinity,
-                    height: 60,
+                    height: 45,
                     child: ElevatedButton(
                       onPressed: () {
                         UserController.getWalletBallance();
                         Get.toNamed(Routes.checkoutRoute);
                       },
-                      child: Text(
+                      child: const Text(
                         'Proceed to checkout',
                         style: TextStyle(
-                            color: secondarycolor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20),
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16),
                       ),
                     ),
                   ),

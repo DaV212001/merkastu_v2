@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:merkastu_v2/constants/constants.dart';
+import 'package:merkastu_v2/constants/pages.dart';
 import 'package:merkastu_v2/screens/auth/sign_up_screen.dart';
 
 import '../../controllers/auth_controller.dart';
-import '../../widgets/loading_animated_button.dart';
-import '../../widgets/password_input_field.dart';
+import '../../widgets/animated_widgets/loading_animated_button.dart';
+import '../../widgets/input_feilds/password_input_field.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -24,9 +25,8 @@ class LoginScreen extends StatelessWidget {
         title: const Center(
           child: Text('Login',
               style: TextStyle(
-                color: Colors.black,
-                fontFamily: 'Righteous',
-                fontSize: 25,
+                fontFamily: 'Montserrat',
+                fontSize: 18,
               )),
         ),
       ),
@@ -84,7 +84,7 @@ class LoginScreen extends StatelessWidget {
                             "Logging in...",
                             style: TextStyle(
                                 color: maincolor,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w600,
                                 fontSize: 16),
                           ),
                         ),
@@ -139,15 +139,15 @@ class LoginScreen extends StatelessWidget {
                     ),
                     GestureDetector(
                       onTap: () {
-                        Get.to(() =>
-                            const SignUpScreen()); // Use Get for navigation
+                        Get.offAndToNamed(
+                            Routes.signupRoute); // Use Get for navigation
                       },
                       child: Text(
                         " Sign Up",
                         style: TextStyle(
                             color: maincolor,
                             fontFamily: 'Montserrat',
-                            fontWeight: FontWeight.bold),
+                            fontWeight: FontWeight.w600),
                       ),
                     )
                   ]),

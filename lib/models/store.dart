@@ -13,6 +13,7 @@ class Store {
   final bool? insideAastu;
   final String? ownerId;
   final int? deliveryFee;
+  bool favorited = false;
 
   Store({
     this.deliveryFee,
@@ -42,4 +43,19 @@ class Store {
         insideAastu = json['inside_aastu'],
         deliveryFee = json['delivery_fee'],
         ownerId = json['owner_id'];
+
+  Store.fromOrderDetailJson(
+    Map<String, dynamic> json,
+  )   : id = json['store_id'],
+        name = json['store_name'],
+        location = '',
+        latitude = json['latitude'],
+        longitude = json['longitude'],
+        cover = '',
+        logo = kStoreImageBaseUrl + json['store_logo'],
+        vat = json['vat'],
+        ownerId = '',
+        deliveryTime = json['estimated_delivery_time'],
+        insideAastu = false,
+        deliveryFee = json['delivery_fee'];
 }

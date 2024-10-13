@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../constants/constants.dart';
+import '../../constants/constants.dart';
 
 class PasswordInput extends StatefulWidget {
   final String hintText;

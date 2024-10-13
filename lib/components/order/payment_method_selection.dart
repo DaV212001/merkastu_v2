@@ -1,19 +1,21 @@
 import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:merkastu_v2/constants/constants.dart';
 
-import '../../controllers/home_controller.dart';
 import '../../utils/payment_methods.dart';
 
 class PaymentMethodSelection extends StatefulWidget {
   final Function(PaymentMethod) onMethodSelected;
   final bool walletInsufficient;
+  final PaymentMethod initialMethod;
+  final bool? fromFill;
 
   const PaymentMethodSelection({
     super.key,
     required this.onMethodSelected,
     required this.walletInsufficient,
+    this.fromFill = false,
+    this.initialMethod = PaymentMethod.none, // default value if not provided
   });
 
   @override
@@ -21,15 +23,24 @@ class PaymentMethodSelection extends StatefulWidget {
 }
 
 class _PaymentMethodSelectionState extends State<PaymentMethodSelection> {
-  final HomeController homeController = Get.find<HomeController>(tag: 'home');
-  PaymentMethod _selectedMethod = PaymentMethod.none;
+  late PaymentMethod _selectedMethod;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedMethod =
+        widget.initialMethod; // Initialize with the provided method
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: PaymentMethod.values
-          .where((method) => method != PaymentMethod.none)
-          .map((method) {
+      children: PaymentMethod.values.where((method) {
+        var methodFilter = widget.fromFill == true
+            ? method != PaymentMethod.none && method != PaymentMethod.wallet
+            : method != PaymentMethod.none;
+        return methodFilter;
+      }).map((method) {
         bool isWalletMethod = method == PaymentMethod.wallet;
         bool isWalletDisabled = isWalletMethod && widget.walletInsufficient;
 
@@ -47,13 +58,18 @@ class _PaymentMethodSelectionState extends State<PaymentMethodSelection> {
             ),
             leading: Radio<PaymentMethod>(
               value: method,
-              groupValue: homeController.selectedPaymentPlan.value,
+              groupValue: _selectedMethod,
               onChanged: (PaymentMethod? value) {
                 if (isWalletDisabled) {
-                  Get.snackbar('Error',
-                      'Your wallet balance is insufficient. Please top up to use this payment method.');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Your wallet balance is insufficient. Please top up to use this payment method.',
+                      ),
+                    ),
+                  );
                 } else {
-                  // Update the selected method if not disabled
+                  // Update the selected method
                   setState(() {
                     _selectedMethod = value!;
                   });
@@ -68,8 +84,8 @@ class _PaymentMethodSelectionState extends State<PaymentMethodSelection> {
             title: Text(
               method.name,
               style: TextStyle(
-                fontSize: 16,
-                color: isWalletDisabled ? Colors.grey : Colors.black,
+                fontSize: 12,
+                color: isWalletDisabled ? Colors.grey : null,
               ),
             ),
             trailing: isWalletDisabled

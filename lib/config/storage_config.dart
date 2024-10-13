@@ -38,7 +38,6 @@ class ConfigPreference {
   /// get if the current theme type is light
   static bool getThemeIsLight() =>
       sharedPreferencesInstance.getBool(_lightThemeKey) ?? true;
-  // todo set the default theme (true for light, false for dark)
 
   /// check if the app is first launch
   static bool isFirstLaunch() =>
@@ -91,7 +90,7 @@ class ConfigPreference {
   static Future<void> clear() async => await sharedPreferencesInstance.clear();
   static Future<void> logOut() async => sharedPreferencesInstance
     ..getKeys().forEach((key) {
-      if (key != 'is_first_launch' && key != 'verification-notification') {
+      if (key != 'is_first_launch' && key != 'is_theme_light') {
         ConfigPreference.getStorage().remove(key);
       }
     });

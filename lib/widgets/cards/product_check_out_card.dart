@@ -2,7 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:merkastu_v2/constants/constants.dart';
 
-import '../models/product.dart';
+import '../../models/product.dart';
 
 class ProductCheckOutCard extends StatelessWidget {
   const ProductCheckOutCard({
@@ -25,7 +25,7 @@ class ProductCheckOutCard extends StatelessWidget {
               Text(
                 "${product.name}",
                 style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
               if (product.addons != null && product.addons!.isNotEmpty)
                 Column(
@@ -42,7 +42,7 @@ class ProductCheckOutCard extends StatelessWidget {
                           stepGranularity: 0.5,
                           overflow: TextOverflow.visible,
                           style: TextStyle(
-                              color: maincolor, fontWeight: FontWeight.bold),
+                              color: maincolor, fontWeight: FontWeight.w600),
                         ),
                       )
                       .toList(),
@@ -60,7 +60,7 @@ class ProductCheckOutCard extends StatelessWidget {
           maxFontSize: 12,
           stepGranularity: 0.5,
           overflow: TextOverflow.visible,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         AutoSizeText(
           'Product price: ${product.price} Birr',
@@ -69,7 +69,7 @@ class ProductCheckOutCard extends StatelessWidget {
           maxFontSize: 12,
           stepGranularity: 0.5,
           overflow: TextOverflow.visible,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         if (product.addons != null &&
             product.addons!.isNotEmpty &&
@@ -81,7 +81,7 @@ class ProductCheckOutCard extends StatelessWidget {
             maxFontSize: 12,
             stepGranularity: 0.5,
             overflow: TextOverflow.visible,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(fontWeight: FontWeight.w600),
           ),
         AutoSizeText(
           "Subtotal product price: ${product.totalPrice()} Birr",
@@ -90,7 +90,7 @@ class ProductCheckOutCard extends StatelessWidget {
           maxFontSize: 12,
           stepGranularity: 0.5,
           overflow: TextOverflow.visible,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         const Divider(
             // color: Colors.white,

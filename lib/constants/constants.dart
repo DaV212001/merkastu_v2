@@ -1,13 +1,15 @@
 import 'dart:io';
-import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:retry/retry.dart';
 
-String kApiBaseUrl = 'https://merkastuapi.endevour.org';
+import '../controllers/theme_mode_controller.dart';
+
+String kApiBaseUrl = 'https://merkastu.endevour.org';
 String kStoreImageBaseUrl =
-    'https://merkastuapi.endevour.org/public/store-images/';
+    'https://merkastu.endevour.org/public/store-images/';
 String kProductImagebaseUrl =
-    'https://merkastuapi.endevour.org/public/product-images/';
+    'https://merkastu.endevour.org/public/product-images/';
 
 final client = HttpClient();
 const retryOptions = RetryOptions(
@@ -26,5 +28,17 @@ String imageLoader = 'assets/images/loading.gif';
 String apartmentImage =
     'https://images.pexels.com/photos/323705/pexels-photo-323705.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1';
 Color maincolor = const Color(0xFF039D55);
-Color secondarycolor = true ? const Color(0xFFFFFFFF) : const Color(0xFF062945);
+Color secondarycolor = const Color(0xFF062945);
 Color maincolorLightTint = const Color(0xFFBDECD6);
+List<BoxShadow> kCardShadow() {
+  return [
+    BoxShadow(
+      color: ThemeModeController.isLightTheme.value
+          ? Colors.grey.withOpacity(0.3)
+          : Colors.black38,
+      spreadRadius: 1,
+      blurRadius: 10,
+      offset: const Offset(0, 3), // changes position of shadow
+    ),
+  ];
+}

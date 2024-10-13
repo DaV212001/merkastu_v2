@@ -5,11 +5,12 @@ import 'package:merkastu_v2/controllers/home_controller.dart';
 import 'package:merkastu_v2/models/product.dart';
 import 'package:merkastu_v2/utils/error_data.dart';
 import 'package:merkastu_v2/utils/payment_methods.dart';
-import 'package:merkastu_v2/widgets/custom_input_field.dart';
+import 'package:merkastu_v2/widgets/animated_widgets/loading_animated_button.dart';
+import 'package:merkastu_v2/widgets/input_feilds/custom_input_field.dart';
 
 import '../../components/order/order_tab.dart';
 import '../../constants/assets.dart';
-import '../../widgets/error_card.dart';
+import '../../widgets/cards/error_card.dart';
 import '../../widgets/wallet_balance.dart';
 
 class CheckOutScreen extends StatefulWidget {
@@ -29,6 +30,7 @@ class _CheckOutScreenState extends State<CheckOutScreen>
     _tabController = TabController(length: 2, vsync: this);
   }
 
+  var transactionController = TextEditingController();
   @override
   void dispose() {
     _tabController.dispose();
@@ -37,8 +39,8 @@ class _CheckOutScreenState extends State<CheckOutScreen>
 
   @override
   Widget build(BuildContext context) {
-    final HomeController homeController = Get.find<HomeController>(tag: 'home');
-    List<Product> products = homeController.cart;
+    final HomeController controller = Get.find<HomeController>(tag: 'home');
+    List<Product> products = controller.cart;
 
     double subTotalPrice = 0.00;
     double deliveryCharge = 0.00; // Now calculated per store
@@ -52,12 +54,11 @@ class _CheckOutScreenState extends State<CheckOutScreen>
 
     // Group products by store and calculate store-specific delivery fees
     Map<String, List<Product>> groupedProducts =
-        homeController.groupCartItemsByStore();
+        controller.groupCartItemsByStore();
     groupedProducts.forEach((storeId, storeProducts) {
       // Find the store's delivery fee from the store list
-      String storeName =
-          homeController.storeNameById(storeId) ?? "Unknown Store";
-      num storeDeliveryFee = homeController.storeList
+      String storeName = controller.storeNameById(storeId) ?? "Unknown Store";
+      num storeDeliveryFee = controller.storeList
               .firstWhere((store) => store.id == storeId)
               .deliveryFee ??
           10.00;
@@ -100,10 +101,10 @@ class _CheckOutScreenState extends State<CheckOutScreen>
             child: TabBarView(
               controller: _tabController,
               children: [
-                Order(
+                OrderTab(
                   tabController: _tabController,
                   groupedProducts: groupedProducts,
-                  homeController: homeController,
+                  homeController: controller,
                   subTotalPrice: subTotalPrice,
                   deliveryCharge: deliveryCharge,
                   serviceCharge: serviceCharge,
@@ -115,9 +116,9 @@ class _CheckOutScreenState extends State<CheckOutScreen>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Obx(
-                        () => homeController.selectedPaymentPlan.value ==
+                        () => controller.selectedPaymentPlan.value ==
                                     PaymentMethod.none ||
-                                homeController.orderId.value == ''
+                                controller.orderId.value == ''
                             ? Center(
                                 child: ErrorCard(
                                   errorData: ErrorData(
@@ -136,8 +137,7 @@ class _CheckOutScreenState extends State<CheckOutScreen>
                                   const SizedBox(
                                     height: 20,
                                   ),
-                                  homeController
-                                      .selectedPaymentPlan.value.cover,
+                                  controller.selectedPaymentPlan.value.cover,
                                   const SizedBox(
                                     height: 20,
                                   ),
@@ -152,13 +152,13 @@ class _CheckOutScreenState extends State<CheckOutScreen>
                                             const Text(
                                               'Name:',
                                               style: TextStyle(
-                                                  fontWeight: FontWeight.bold),
+                                                  fontWeight: FontWeight.w600),
                                             ),
                                             Text(
                                               'Amanuel Wonde',
                                               style: TextStyle(
                                                   color: maincolor,
-                                                  fontWeight: FontWeight.bold),
+                                                  fontWeight: FontWeight.w600),
                                             ),
                                           ],
                                         ),
@@ -169,14 +169,14 @@ class _CheckOutScreenState extends State<CheckOutScreen>
                                             const Text(
                                               'Account:',
                                               style: TextStyle(
-                                                  fontWeight: FontWeight.bold),
+                                                  fontWeight: FontWeight.w600),
                                             ),
                                             Text(
-                                              homeController.selectedPaymentPlan
+                                              controller.selectedPaymentPlan
                                                   .value.accountNumber,
                                               style: TextStyle(
                                                   color: maincolor,
-                                                  fontWeight: FontWeight.bold),
+                                                  fontWeight: FontWeight.w600),
                                             ),
                                           ],
                                         ),
@@ -191,25 +191,65 @@ class _CheckOutScreenState extends State<CheckOutScreen>
                                           'Please make a payment to the account listed above and paste the transaction/reference ID below',
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
-                                              fontWeight: FontWeight.bold),
+                                              fontWeight: FontWeight.w600),
                                         ),
                                         const SizedBox(
                                           height: 20,
                                         ),
                                         CustomInputField(
                                           inputController:
-                                              TextEditingController(
-                                            text: homeController
-                                                .transactionId.value,
-                                          ),
+                                              transactionController,
                                           label: 'Transaction ID',
                                           hintText:
                                               'Enter your transaction/reference ID',
                                           onChanged: (value) {
-                                            homeController.transactionId.value =
+                                            print(value);
+                                            controller.transactionId.value =
                                                 value;
                                           },
-                                        )
+                                        ),
+                                        const SizedBox(
+                                          height: 10,
+                                        ),
+                                        Obx(() => controller
+                                                .verifyingPayment.value
+                                            ? LoadingAnimatedButton(
+                                                width: double.infinity,
+                                                height: 50,
+                                                color: maincolor,
+                                                child: Text(
+                                                  'Verifying payment...',
+                                                  style: TextStyle(
+                                                      color: maincolor,
+                                                      fontWeight:
+                                                          FontWeight.w600),
+                                                ),
+                                                onTap: () {})
+                                            : SizedBox(
+                                                width: double.infinity,
+                                                height: 50,
+                                                child: ElevatedButton(
+                                                    onPressed: controller
+                                                                .transactionId
+                                                                .value !=
+                                                            ''
+                                                        ? () => controller
+                                                            .verifyPayment()
+                                                        : null,
+                                                    style: ElevatedButton.styleFrom(
+                                                        disabledForegroundColor:
+                                                            Colors.grey,
+                                                        disabledBackgroundColor:
+                                                            Colors.grey),
+                                                    child: const Text(
+                                                      'Verify payment',
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          fontSize: 16),
+                                                    )),
+                                              )),
                                       ],
                                     ),
                                   )

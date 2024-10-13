@@ -7,6 +7,8 @@ import 'package:get/get.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:logger/logger.dart';
 import 'package:merkastu_v2/config/dio_config.dart';
+import 'package:merkastu_v2/controllers/home_controller.dart';
+import 'package:merkastu_v2/utils/payment_methods.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 
@@ -70,8 +72,7 @@ class SignUpController extends GetxController {
       Logger().d(response.data);
       if ((response.statusCode == 201 || response.statusCode == 200) &&
           response.data['status'] == true) {
-        Get.snackbar('Success', 'Sign-up completed!');
-        Get.toNamed(Routes.phoneVerifyRoute);
+        Get.offAndToNamed(Routes.phoneVerifyRoute);
       } else {
         throw Exception(response.data);
       }
@@ -114,7 +115,9 @@ class SignUpController extends GetxController {
           UserController.isLoggedIn.value = true;
           verificationStatus.value = VerificationStatus.verified;
           ConfigPreference.setUserToken(data['token']);
-          Get.offAllNamed(Routes.initialRoute);
+          UserController.getLoggedInUser();
+          UserController.isLoggedIn.value = true;
+          Get.back();
         } else if (data['status'] == 'pending') {
           // Verification is pending, no action needed
           verificationStatus.value = VerificationStatus.pending;
@@ -199,8 +202,10 @@ class LoginController extends GetxController {
             response.data['status'] == true) {
           final data = response.data['data'];
           ConfigPreference.setUserToken(data['token']);
+          UserController.getLoggedInUser();
+          UserController.isLoggedIn.value = true;
+          Get.back();
           Get.snackbar('Success', 'Logged in successfully');
-          Get.offAllNamed(Routes.initialRoute);
         } else {
           throw 'custom' + response.data['message'];
         }
@@ -238,9 +243,18 @@ class LoginController extends GetxController {
   }
 }
 
-class UserController extends GetxController {
+class UserController extends GetxController
+    with GetSingleTickerProviderStateMixin {
   static Rx<User> user = User().obs;
   static RxBool isLoggedIn = false.obs;
+
+  late TabController tabController;
+
+  @override
+  void onInit() {
+    super.onInit();
+    tabController = TabController(length: 2, vsync: this);
+  }
 
   static getLoggedInUser() {
     User userTemp = User();
@@ -251,16 +265,81 @@ class UserController extends GetxController {
 
       Map<String, dynamic> decodedToken = JwtDecoder.decode(accessToken!);
 
-      print('ACCESS TOKEN FETCH LOGGED IN USER: $decodedToken');
+      print('ACCESS TOKEN FETCH LOGGED IN USER: $accessToken');
       final user = User.fromJson(decodedToken, accessToken);
       // String blue = '\u001b[34m'; // ANSI code for blue
       // String reset = '\u001b[0m'; // Reset ANSI code
       // print('${blue} ${user.toString()} ${reset}');
       userTemp = user;
+      if (Get.isRegistered<HomeController>(tag: 'home')) {
+        Get.find<HomeController>(tag: 'home').block.value =
+            (user.block ?? 0).toString();
+        Get.find<HomeController>(tag: 'home').room.value =
+            (user.room ?? 0).toString();
+      }
+      isLoggedIn.value = true;
+      isLoggedIn.refresh();
+      Logger().d('Logged in: ${isLoggedIn.value}');
+      getWalletBallance();
     } else {
       isLoggedIn.value = false;
     }
     user.value = userTemp;
+    user.refresh();
+  }
+
+  static var amount = ''.obs;
+  static var selectedPaymentMethod = PaymentMethod.none.obs;
+  static var transactionId = ''.obs;
+
+  static var fillingWallet = false.obs;
+
+  static fillWallet() async {
+    fillingWallet.value = true;
+    dio.Response response = dio.Response(requestOptions: dio.RequestOptions());
+    try {
+      response = await DioConfig.dio().post('/user/wallet/fill',
+          data: {
+            'amount': int.parse(amount.value),
+            'paymentMethod': selectedPaymentMethod.value.name,
+            'referenceId': transactionId.value
+          },
+          options: dio.Options(
+            headers: {
+              'Authorization': ConfigPreference.getUserToken(),
+            },
+            contentType: 'application/json',
+          ));
+      Logger().d(response.data);
+      if ((response.statusCode == 200 || response.statusCode == 201) &&
+          response.data['status'] == true) {
+        getWalletBallance();
+        Get.back();
+        amount.value = '';
+        transactionId.value = '';
+        selectedPaymentMethod.value = PaymentMethod.none;
+        Get.snackbar('Success', 'Wallet filled successfully');
+      } else {
+        throw 'custom' + response.data['message'];
+      }
+      Logger().d(response.data);
+      fillingWallet.value = false;
+    } catch (e, stack) {
+      Logger().t(e, stackTrace: stack);
+      String errorString = (await ErrorUtil.getErrorData(e.toString())).body;
+      if (errorString.startsWith('custom')) {
+        errorString = errorString.replaceFirst('custom', '');
+      }
+      var connectivityResult = await (Connectivity().checkConnectivity());
+      if (connectivityResult[0] == ConnectivityResult.none) {
+        errorString = 'No internet connection';
+      }
+      if (e is FormatException) {
+        errorString = 'Unexpected error occured, please try again';
+      }
+      Get.snackbar('Error', errorString);
+      fillingWallet.value = false;
+    }
   }
 
   static RxDouble walletBallance = 0.00.obs;
@@ -269,13 +348,20 @@ class UserController extends GetxController {
     loadingBalance.value = true;
     dio.Response response = dio.Response(requestOptions: dio.RequestOptions());
     try {
-      response = await DioConfig.dio().get('/user/wallet');
+      response = await DioConfig.dio().get('/user/wallet/get-balance',
+          options: dio.Options(
+            headers: {
+              'Authorization': ConfigPreference.getUserToken(),
+            },
+          ));
+      Logger().d(response.data);
       if (response.statusCode == 200 && response.data['status'] == true) {
         walletBallance.value =
             (response.data['data']['balance'] ?? 0).toDouble();
       } else {
         Exception(response.data['message']);
       }
+      Logger().d(response.data);
       loadingBalance.value = false;
     } catch (e, stack) {
       loadingBalance.value = false;

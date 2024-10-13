@@ -16,20 +16,25 @@ class ThemeModeController extends GetxController {
     super.onInit();
     _themeMode =
         appTheme(_context, isDark: !ConfigPreference.getThemeIsLight()).obs;
-    // print(
-    //     'SET THEME: ${_themeMode.value.cardColor == appTheme(_context, isDark: true).cardColor}');
+    isLightTheme = ConfigPreference.getThemeIsLight().obs;
+    print('SET THEME: ${ConfigPreference.getThemeIsLight()}');
   }
 
+  static late RxBool isLightTheme;
+
   static ThemeData getThemeMode() => _themeMode.value;
-  static void setThemeMode(ThemeData value) => _themeMode.value = value;
+  static void setThemeMode(ThemeData value) {
+    _themeMode.value = value;
+    isLightTheme.value = isCurrentlyLight();
+  }
+
   static bool isCurrentlyLight() =>
-      _themeMode.value.cardColor == appTheme(_context, isDark: false).cardColor;
+      _themeMode.value == appTheme(_context, isDark: false);
   static void toggleThemeMode() {
-    bool isCurrentlyLight = _themeMode.value.cardColor ==
-        appTheme(_context, isDark: false).cardColor;
-    bool isLight = !isCurrentlyLight;
-    setThemeMode(appTheme(_context, isDark: !isLight));
-    ConfigPreference.setThemeIsLight(isLight);
+    bool isCurrentlyLight =
+        _themeMode.value == appTheme(_context, isDark: false);
+    setThemeMode(appTheme(_context, isDark: isCurrentlyLight));
+    ConfigPreference.setThemeIsLight(!isCurrentlyLight);
     Logger().d(isCurrentlyLight);
   }
 }

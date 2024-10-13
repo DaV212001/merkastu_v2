@@ -1,21 +1,27 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:merkastu_v2/constants/constants.dart';
-import 'package:merkastu_v2/widgets/cached_image_widget_wrapper.dart';
-import 'package:merkastu_v2/widgets/loading.dart';
+import 'package:merkastu_v2/widgets/animated_widgets/loading.dart';
+
+import '../cached_image_widget_wrapper.dart';
 
 class StoreCard extends StatelessWidget {
   final String name;
   final String location;
   final String image;
   final String deliveryTime;
+  final bool favorited;
+  final Function()? onHeartTap;
 
   const StoreCard(
       {super.key,
       required this.name,
       required this.location,
       required this.image,
-      required this.deliveryTime});
+      required this.deliveryTime,
+      required this.favorited,
+      this.onHeartTap});
 
   @override
   Widget build(BuildContext context) {
@@ -25,14 +31,7 @@ class StoreCard extends StatelessWidget {
       decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: 1,
-              blurRadius: 10,
-              offset: const Offset(0, 3), // changes position of shadow
-            ),
-          ]),
+          boxShadow: kCardShadow()),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -65,15 +64,26 @@ class StoreCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  name,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      name,
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleSmall
+                          ?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    GestureDetector(
+                      onTap: onHeartTap,
+                      child: Icon(
+                        favorited
+                            ? EneftyIcons.heart_bold
+                            : EneftyIcons.heart_outline,
+                        color: maincolor,
+                      ),
+                    )
+                  ],
                 ),
                 const SizedBox(
                   height: 5,
@@ -91,10 +101,10 @@ class StoreCard extends StatelessWidget {
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.8,
                       child: AutoSizeText(
-                        location,
+                        location.trim(),
                         maxLines: 2,
-                        minFontSize: 12,
-                        maxFontSize: 14,
+                        minFontSize: 5,
+                        maxFontSize: 10,
                         stepGranularity: 0.5,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodySmall,
@@ -117,7 +127,10 @@ class StoreCard extends StatelessWidget {
                     ),
                     Text(
                       '$deliveryTime min',
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall!
+                          .copyWith(fontSize: 10),
                     ),
                   ],
                 ),

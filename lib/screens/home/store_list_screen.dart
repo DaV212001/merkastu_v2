@@ -1,31 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:merkastu_v2/constants/pages.dart';
 import 'package:merkastu_v2/controllers/home_controller.dart';
 import 'package:merkastu_v2/utils/api_call_status.dart';
-import 'package:merkastu_v2/widgets/shimmers/shimmering_store_card.dart';
-import 'package:merkastu_v2/widgets/store_card.dart';
+import 'package:merkastu_v2/widgets/cards/store_card.dart';
 
 import '../../components/restaurant/restaurant_list_top_section.dart';
 import '../../constants/assets.dart';
 import '../../models/store.dart';
+import '../../utils/animations.dart';
 import '../../utils/error_data.dart';
-import '../../widgets/error_card.dart';
+import '../../widgets/cards/error_card.dart';
+import '../../widgets/shimmers/shimmering_store_card.dart';
 
 class StoreListScreen extends StatelessWidget {
-  final HomeController homeController = Get.find<HomeController>(tag: 'home');
+  final HomeController controller = Get.find<HomeController>(tag: 'home');
   StoreListScreen({super.key});
-
+  final animationsMap = {
+    'containerOnPageLoadAnimation': AnimationInfo(
+      trigger: AnimationTrigger.onPageLoad,
+      effects: [
+        FadeEffect(
+          curve: Curves.easeInOut,
+          delay: 0.ms,
+          duration: 600.ms,
+          begin: 0,
+          end: 1,
+        ),
+        MoveEffect(
+          curve: Curves.easeInOut,
+          delay: 0.ms,
+          duration: 600.ms,
+          begin: Offset(0, 70),
+          end: Offset(0, 0),
+        ),
+      ],
+    ),
+  };
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            RestaurantListTopSection(homeController: homeController),
+            RestaurantListTopSection(homeController: controller),
             Obx(
-              () => homeController.storeLoadingStatus.value ==
-                      ApiCallStatus.loading
+              () => controller.storeLoadingStatus.value == ApiCallStatus.loading
                   ? Expanded(
                       child: ListView.builder(
                         itemCount: 10,
@@ -35,85 +57,94 @@ class StoreListScreen extends StatelessWidget {
                         },
                       ),
                     )
-                  : homeController.storeLoadingErrorData.value.body != ''
+                  : controller.storeLoadingErrorData.value.body != ''
                       ? ErrorCard(
-                          errorData: homeController.storeLoadingErrorData.value,
-                          refresh: homeController.fetchStores,
+                          errorData: controller.storeLoadingErrorData.value,
+                          refresh: controller.fetchStores,
                         )
-                      : homeController.filteredStoreList.isEmpty
+                      : controller.filteredStoreList.isEmpty
                           ? ErrorCard(
                               errorData: ErrorData(
                                   title: '',
                                   body: 'No restaurants found',
                                   image: Assets.empty,
                                   buttonText: 'Retry'),
-                              refresh: homeController.fetchStores,
+                              refresh: controller.fetchStores,
                             )
                           : Expanded(
                               child: RefreshIndicator(
                                 onRefresh: () async {
-                                  homeController.fetchStores();
+                                  controller.fetchStores();
                                 },
                                 child: ListView.builder(
                                     itemCount:
-                                        homeController.filteredStoreList.length,
+                                        controller.filteredStoreList.length,
                                     shrinkWrap: true,
                                     itemBuilder: (context, index) {
                                       return Padding(
                                         padding: const EdgeInsets.all(4.0),
                                         child: GestureDetector(
                                           onTap: () {
-                                            Store previousStore = homeController
-                                                .selectedStore.value;
-                                            homeController.selectedStore.value =
-                                                homeController
+                                            Store previousStore =
+                                                controller.selectedStore.value;
+                                            controller.selectedStore.value =
+                                                controller
                                                     .filteredStoreList[index];
-                                            if (homeController
+                                            if (controller
                                                     .productList.isEmpty ||
                                                 previousStore.id !=
-                                                    homeController
+                                                    controller
                                                         .filteredStoreList[
                                                             index]
                                                         .id) {
-                                              homeController.fetchProducts();
+                                              controller.fetchProducts();
                                             }
                                             Get.toNamed(
-                                                Routes.restaurantDetailRoute);
+                                                Routes.restaurantDetailRoute,
+                                                arguments: controller);
                                           },
                                           child: StoreCard(
-                                              name: homeController
+                                            name: controller
+                                                .filteredStoreList[index].name!,
+                                            location: controller
+                                                .filteredStoreList[index]
+                                                .location!,
+                                            image: controller
+                                                .filteredStoreList[index]
+                                                .cover!,
+                                            deliveryTime: controller
+                                                .filteredStoreList[index]
+                                                .deliveryTime!
+                                                .toString(),
+                                            favorited: controller
+                                                .filteredStoreList[index]
+                                                .favorited,
+                                            onHeartTap: () {
+                                              if (controller
                                                   .filteredStoreList[index]
-                                                  .name!,
-                                              location: homeController
-                                                  .filteredStoreList[index]
-                                                  .location!,
-                                              image: homeController
-                                                  .filteredStoreList[index]
-                                                  .cover!,
-                                              deliveryTime: homeController
-                                                  .filteredStoreList[index]
-                                                  .deliveryTime!
-                                                  .toString()),
+                                                  .favorited) {
+                                                controller.unfavoriteStore(
+                                                    controller
+                                                            .filteredStoreList[
+                                                        index]);
+                                              } else {
+                                                controller.favoriteStore(
+                                                    controller
+                                                            .filteredStoreList[
+                                                        index]);
+                                              }
+                                            },
+                                          ).animateOnPageLoad(animationsMap[
+                                              'containerOnPageLoadAnimation']!),
                                         ),
                                       );
                                     }),
                               ),
                             ),
             ),
-            // const ProductCard(
-            //     image:
-            //         'https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-            //     name: 'Burger',
-            //     description: 'fffffffffffffffffffffffffffffff',
-            //     price: '234',
-            //     favorited: false),
-            // const RestaurantDetailScreenTopSection(
-            //   image:
-            //       'https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-            //   name: 'Burger King',
-            //   location: 'Infront of Kilinto prison jjjjjjjjj',
-            //   favorited: false,
-            // )
+            SizedBox(
+              height: 70.h,
+            )
           ],
         ),
       ),

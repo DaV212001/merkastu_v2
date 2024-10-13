@@ -11,6 +11,7 @@ class Product {
   final String? categoryId;
   final List<Addon>? addons;
   int? amount = 1;
+  bool? favorited = false;
 
   Product(
       {this.id,
@@ -21,7 +22,8 @@ class Product {
       this.storeId,
       this.categoryId,
       this.addons,
-      this.amount});
+      this.amount,
+      this.favorited = false});
 
   Map<String, dynamic> toJson() {
     return {
@@ -54,7 +56,7 @@ class Product {
         image: kProductImagebaseUrl + json['image'],
         storeId: json['store_id'],
         categoryId: json['category_id'],
-        addons: (json['Addon'] as List)
+        addons: ((json['Addon'] ?? []) as List)
             .map((addon) => Addon(
                   id: addon['id'],
                   name: addon['name'],
@@ -63,6 +65,24 @@ class Product {
                 ))
             .toList(),
         amount: 1);
+  }
+  factory Product.fromOrderDetailJson(
+      Map<String, dynamic> json, String storeId) {
+    return Product(
+        id: json['id'],
+        price: json['product_price'],
+        name: (json['product_name'] as String).trim(),
+        storeId: storeId,
+        addons: ((json['order_addons'] ?? []) as List)
+            .map((addon) => Addon(
+                  id: addon['addon_id'],
+                  name: addon['name'],
+                  price: addon['price'],
+                  productId: json['id'],
+                  amount: addon['amount'],
+                ))
+            .toList(),
+        amount: json['amount']);
   }
 
   Product.copy(Product other)

@@ -10,7 +10,7 @@ extension PaymentMethodExtension on PaymentMethod {
   String get name {
     switch (this) {
       case PaymentMethod.none:
-        return "NONE";
+        return "UNPAID";
       case PaymentMethod.cbe:
         return "CBE";
       case PaymentMethod.teleBirr:
@@ -26,13 +26,13 @@ extension PaymentMethodExtension on PaymentMethod {
         return const Icon(Icons.abc);
       case PaymentMethod.cbe:
         return Image.asset(
-          'assets/images/CBE.jpg',
+          'assets/images/CBE.png',
           height: 40,
           width: 40,
         );
       case PaymentMethod.teleBirr:
         return Image.asset(
-          'assets/images/TELEBIRR.jpg',
+          'assets/images/TELEBIRR.png',
           height: 40,
           width: 40,
         );
@@ -79,5 +79,17 @@ extension PaymentMethodExtension on PaymentMethod {
       default:
         return "";
     }
+  }
+
+  static PaymentMethod fromName(String name) {
+    switch (name) {
+      case "CBE":
+        return PaymentMethod.cbe;
+      case "TELEBIRR":
+        return PaymentMethod.teleBirr;
+      case "WALLET":
+        return PaymentMethod.wallet;
+    }
+    return PaymentMethod.none;
   }
 }

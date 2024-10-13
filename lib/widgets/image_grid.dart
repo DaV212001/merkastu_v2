@@ -1,14 +1,15 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:merkastu_v2/models/order.dart';
 
 import '../constants/constants.dart';
+import 'animated_widgets/loading.dart';
 import 'cached_image_widget_wrapper.dart';
-import 'loading.dart';
 
 class ImageGrid extends StatelessWidget {
-  final List<String> images;
+  final List<StoreSmall> stores;
 
-  ImageGrid({required this.images});
+  ImageGrid({required this.stores});
 
   @override
   Widget build(BuildContext context) {
@@ -16,70 +17,76 @@ class ImageGrid extends StatelessWidget {
   }
 
   Widget _buildGrid() {
-    int imageCount = images.length;
+    int storeCount = stores.length;
+    StoreSmall? storeWithMostProducts;
+    int? maxProductCount = 0;
 
-    // Handle 1, 2, or 3 images dynamically
-    if (imageCount == 1) {
+    for (var store in stores) {
+      if (store.productCount! > maxProductCount!) {
+        maxProductCount = store.productCount;
+        storeWithMostProducts = store;
+      }
+    }
+    List<StoreSmall> sortedStores = List.from(stores);
+    sortedStores.remove(storeWithMostProducts);
+    sortedStores.insert(0, storeWithMostProducts!);
+    if (storeCount == 1) {
       return Column(
         children: [
           Expanded(
             child: Row(
               children: [
-                Expanded(child: _buildImageTile(images[0])),
+                Expanded(child: _buildImageTile(stores[0])),
               ],
             ),
           ),
-          // Add a card with a plus icon for adding more images
         ],
       );
-    } else if (imageCount == 2) {
+    } else if (storeCount == 2) {
       return Column(
         children: [
           Expanded(
             child: Row(
               children: [
-                Expanded(child: _buildImageTile(images[0])),
-                Expanded(child: _buildImageTile(images[1])),
+                Expanded(child: _buildImageTile(stores[0])),
+                Expanded(child: _buildImageTile(stores[1])),
               ],
             ),
           ),
-          // Add a card with a plus icon for adding more images
         ],
       );
-    } else if (imageCount == 3) {
+    } else if (storeCount == 3) {
       return Column(
         children: [
           Expanded(
             child: Row(
               children: [
-                Expanded(child: _buildImageTile(images[0])),
+                Expanded(child: _buildImageTile(stores[0])),
                 Expanded(
                   child: Column(
                     children: [
-                      Expanded(flex: 2, child: _buildImageTile(images[1])),
-                      Expanded(flex: 2, child: _buildImageTile(images[2])),
+                      Expanded(flex: 2, child: _buildImageTile(stores[1])),
+                      Expanded(flex: 2, child: _buildImageTile(stores[2])),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-          // Add a card with a plus icon for adding more images
         ],
       );
     } else {
-      // Handle case with more than 3 images (e.g., just displaying 3 and showing a "+" for more)
       return Column(
         children: [
           Expanded(
             child: Row(
               children: [
-                Expanded(child: _buildImageTile(images[0])),
+                Expanded(child: _buildImageTile(stores[0])),
                 Expanded(
                   child: Column(
                     children: [
-                      Expanded(flex: 2, child: _buildImageTile(images[1])),
-                      Expanded(flex: 2, child: _buildImageTile(images[2])),
+                      Expanded(flex: 2, child: _buildImageTile(stores[1])),
+                      Expanded(flex: 2, child: _buildImageTile(stores[2])),
                       Expanded(
                         child: Container(
                           width: double.infinity,
@@ -98,10 +105,12 @@ class ImageGrid extends StatelessWidget {
                           ),
                           child: Center(
                             child: Text(
-                              '+${imageCount - 3} more stores',
+                              '+${storeCount - 3} more ${{
+                                (storeCount - 3) > 1 ? 'stores' : 'store'
+                              }}',
                               style: const TextStyle(
                                   color: Colors.white,
-                                  fontWeight: FontWeight.bold),
+                                  fontWeight: FontWeight.w600),
                             ),
                           ),
                         ),
@@ -119,23 +128,27 @@ class ImageGrid extends StatelessWidget {
   }
 
   List<Widget> _buildImageTiles() {
-    return images.map((imageUrl) => _buildImageTile(imageUrl)).toList();
+    return stores.map((imageUrl) => _buildImageTile(imageUrl)).toList();
   }
 
-  Widget _buildImageTile(String imageUrl) {
+  Widget _buildImageTile(StoreSmall store) {
     return Padding(
       padding: const EdgeInsets.all(2.0),
       child: Stack(
         children: [
           cachedNetworkImageWrapper(
-            imageUrl: imageUrl,
+            imageUrl: store.coverImage!,
             imageBuilder: (context, imageProvider) => Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(7),
               ),
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(7),
+                child: Image.network(
+                  store.coverImage!,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                ),
               ),
             ),
             placeholderBuilder: (context, path) => Container(
@@ -171,32 +184,32 @@ class ImageGrid extends StatelessWidget {
               ),
             ),
           ),
-          const Positioned(
+          Positioned(
               bottom: 8.0,
               right: 8.0,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   AutoSizeText(
-                    'Tulu Ertib',
+                    store.storeName!,
                     maxLines: 1,
-                    minFontSize: 9,
-                    maxFontSize: 18,
+                    minFontSize: 6,
+                    maxFontSize: 15,
                     stepGranularity: 1,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white, // For contrast
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                       fontSize: 18,
                     ),
                   ),
                   AutoSizeText(
-                    '3 Products',
+                    '${store.productCount} ${store.productCount == 1 ? 'product' : 'products'}',
                     maxLines: 1,
-                    minFontSize: 8,
-                    maxFontSize: 12,
+                    minFontSize: 5,
+                    maxFontSize: 9,
                     stepGranularity: 0.5,
-                    style: TextStyle(
-                        color: Colors.grey, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        color: Colors.grey, fontWeight: FontWeight.w600),
                   ),
                 ],
               )),

@@ -27,11 +27,11 @@ class PriceSummary extends StatelessWidget {
           children: [
             const Text(
               "Subtotal:",
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(fontWeight: FontWeight.w600),
             ),
             Text(
               "${subTotalPrice.toStringAsFixed(2)} Birr",
-              style: TextStyle(color: maincolor, fontWeight: FontWeight.bold),
+              style: TextStyle(color: maincolor, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -41,7 +41,7 @@ class PriceSummary extends StatelessWidget {
             const Text("Total delivery charge:"),
             Text(
               '${deliveryCharge.toStringAsFixed(2)} Birr',
-              style: TextStyle(color: maincolor, fontWeight: FontWeight.bold),
+              style: TextStyle(color: maincolor, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -86,7 +86,7 @@ class PriceSummary extends StatelessWidget {
             ),
             Text(
               "${serviceCharge.toStringAsFixed(2)} Birr",
-              style: TextStyle(color: maincolor, fontWeight: FontWeight.bold),
+              style: TextStyle(color: maincolor, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -97,14 +97,14 @@ class PriceSummary extends StatelessWidget {
             const Text(
               "Total: ",
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
                 fontSize: 18,
               ),
             ),
             Text(
               "${grandTotal.roundToDouble().toStringAsFixed(2)} Birr",
               style: TextStyle(
-                  color: maincolor, fontWeight: FontWeight.bold, fontSize: 18),
+                  color: maincolor, fontWeight: FontWeight.w600, fontSize: 18),
             ),
           ],
         ),

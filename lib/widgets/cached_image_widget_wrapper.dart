@@ -13,6 +13,9 @@ Widget cachedNetworkImageWrapper({
     imageBuilder: imageBuilder,
     placeholder: placeholderBuilder,
     errorWidget: errorWidgetBuilder,
+    errorListener: (e) {
+      print('');
+    },
     cacheManager: DefaultCacheManager(), // Ensure caching is enabled
     cacheKey: imageUrl, // Assign a cache key to avoid re-downloading
   );

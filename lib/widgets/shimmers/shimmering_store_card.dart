@@ -12,17 +12,9 @@ class ShimmeringStoreCard extends StatelessWidget {
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: 1,
-              blurRadius: 10,
-              offset: const Offset(0, 3), // changes position of shadow
-            ),
-          ],
-        ),
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: kCardShadow()),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

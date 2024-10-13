@@ -23,45 +23,49 @@ class RestaurantListTopSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextField(
-            decoration: InputDecoration(
-              hintText: 'Search for your favorite restaurants',
-              prefixIcon: Icon(
-                EneftyIcons.search_normal_outline,
-                color: maincolor,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(
+          SizedBox(
+            height: 40,
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Search for your favorite restaurants',
+                hintStyle: const TextStyle(fontSize: 10),
+                prefixIcon: Icon(
+                  EneftyIcons.search_normal_outline,
                   color: maincolor,
-                  width: 1,
                 ),
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-              focusedErrorBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: maincolor,
-                  width: 1,
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: maincolor,
+                    width: 1,
+                  ),
+                  borderRadius: BorderRadius.circular(12.0),
                 ),
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: maincolor,
-                  width: 1,
+                focusedErrorBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: maincolor,
+                    width: 1,
+                  ),
+                  borderRadius: BorderRadius.circular(12.0),
                 ),
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: maincolor,
-                  width: 1,
+                errorBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: maincolor,
+                    width: 1,
+                  ),
+                  borderRadius: BorderRadius.circular(12.0),
                 ),
-                borderRadius: BorderRadius.circular(12.0),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: maincolor,
+                    width: 1,
+                  ),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
               ),
+              onChanged: (value) {
+                homeController.searchForStores(value);
+              },
             ),
-            onChanged: (value) {
-              homeController.searchForStores(value);
-            },
           ),
           const SizedBox(
             height: 10,
@@ -69,8 +73,8 @@ class RestaurantListTopSection extends StatelessWidget {
           const Text(
             'Restaurants',
             style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
             ),
           ),
           const SizedBox(
@@ -104,8 +108,8 @@ class RestaurantListTopSection extends StatelessWidget {
                                   }
                                 },
                                 child: Container(
-                                  height: 50,
-                                  width: 100,
+                                  height: 40,
+                                  width: 80,
                                   decoration: BoxDecoration(
                                     color: Theme.of(context).cardColor,
                                     border: Border.all(
@@ -125,24 +129,28 @@ class RestaurantListTopSection extends StatelessWidget {
                                     ),
                                   ),
                                   child: Center(
-                                    child: AutoSizeText(
-                                      restaurantCategories[index],
-                                      maxLines: 1,
-                                      minFontSize: 9,
-                                      maxFontSize: 12,
-                                      stepGranularity: 0.5,
-                                      overflow: TextOverflow.visible,
-                                      style: TextStyle(
-                                          fontWeight: homeController
-                                                      .selectedIndex.value ==
-                                                  index
-                                              ? FontWeight.bold
-                                              : null,
-                                          color: homeController
-                                                      .selectedIndex.value ==
-                                                  index
-                                              ? maincolor
-                                              : null),
+                                    child: SizedBox(
+                                      width: 70,
+                                      child: AutoSizeText(
+                                        restaurantCategories[index],
+                                        maxLines: 1,
+                                        minFontSize: 5,
+                                        maxFontSize: 9,
+                                        stepGranularity: 0.5,
+                                        textAlign: TextAlign.center,
+                                        overflow: TextOverflow.visible,
+                                        style: TextStyle(
+                                            fontWeight: homeController
+                                                        .selectedIndex.value ==
+                                                    index
+                                                ? FontWeight.w600
+                                                : null,
+                                            color: homeController
+                                                        .selectedIndex.value ==
+                                                    index
+                                                ? maincolor
+                                                : null),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -152,7 +160,8 @@ class RestaurantListTopSection extends StatelessWidget {
                 ),
               ],
             ),
-          )
+          ),
+          const Divider()
         ],
       ),
     );

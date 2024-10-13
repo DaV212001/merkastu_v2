@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:merkastu_v2/components/order/payment_method_selection.dart';
 import 'package:merkastu_v2/components/order/price_summary.dart';
+import 'package:merkastu_v2/utils/api_call_status.dart';
+import 'package:merkastu_v2/widgets/animated_widgets/loading_animated_button.dart';
 
 import '../../constants/constants.dart';
 import '../../controllers/auth_controller.dart';
@@ -12,8 +14,8 @@ import '../../utils/payment_methods.dart';
 import 'delivery_address_selection.dart';
 import 'order_summary.dart';
 
-class Order extends StatelessWidget {
-  const Order({
+class OrderTab extends StatelessWidget {
+  const OrderTab({
     super.key,
     required this.groupedProducts,
     required this.homeController,
@@ -40,40 +42,47 @@ class Order extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Obx(() => Column(
-                children: [
-                  Center(
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Center(
-                        child: Icon(
-                          EneftyIcons.tick_circle_bold,
-                          color: maincolor,
+          Obx(() => homeController.orderId.value == ''
+              ? const SizedBox.shrink()
+              : Column(
+                  children: [
+                    Center(
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Center(
+                          child: Icon(
+                            EneftyIcons.tick_circle_bold,
+                            color: maincolor,
+                            size: MediaQuery.of(context).size.width * 0.5,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Text('Order Placed Successfully',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: maincolor,
-                      ))
-                ],
-              )),
+                    Text('Order Placed Successfully',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: maincolor,
+                        ))
+                  ],
+                )),
           const Padding(
             padding: EdgeInsets.only(top: 8.0, left: 16.0),
             child: Text(
               'Order summary',
               style: TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
           OrderSummary(
             groupedProducts: groupedProducts,
-            homeController: homeController,
+            storeList: homeController.storeList,
+            calculateStoreDeliveryFee: homeController.calculateStoreDeliveryFee,
+            storeNameById: homeController.storeNameById,
+            calculateTotalQuantityOfProductsFromStore: homeController
+                .calculateTotalQuantityOfProductsFromSpecificStore,
           ),
           const Padding(
             padding: EdgeInsets.only(top: 8.0, left: 16.0),
@@ -81,7 +90,7 @@ class Order extends StatelessWidget {
               'Price summary',
               style: TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -98,7 +107,7 @@ class Order extends StatelessWidget {
               'Delivery address',
               style: TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -110,7 +119,7 @@ class Order extends StatelessWidget {
               'Select a payment method',
               style: TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -126,29 +135,73 @@ class Order extends StatelessWidget {
                     homeController.selectedPaymentPlan.value = paymentMethod;
                   },
                 ),
-                SizedBox(
-                  width: double.infinity,
-                  height: 60,
-                  child: Obx(
-                    () => ElevatedButton(
-                      onPressed: homeController.selectedPaymentPlan.value ==
-                              PaymentMethod.none
-                          ? null
-                          : () => homeController.placeOrder(
-                              tabController: tabController),
-                      style: ElevatedButton.styleFrom(
-                          disabledBackgroundColor: Colors.grey,
-                          disabledForegroundColor: maincolor),
-                      child: const Text(
-                        'Place Order',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16),
-                      ),
-                    ),
-                  ),
-                )
+                Obx(
+                  () =>
+                      homeController.placingOrder.value == ApiCallStatus.loading
+                          ? SizedBox(
+                              width: double.infinity,
+                              height: 60,
+                              child: LoadingAnimatedButton(
+                                  color: maincolor,
+                                  child: Text(
+                                    'Placing order',
+                                    style: TextStyle(
+                                        color: maincolor,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16),
+                                  ),
+                                  onTap: () {}),
+                            )
+                          : SizedBox(
+                              width: double.infinity,
+                              height: 60,
+                              child: Obx(
+                                () => ElevatedButton(
+                                  onPressed: homeController
+                                              .selectedPaymentPlan.value ==
+                                          PaymentMethod.none
+                                      ? null
+                                      : homeController.placingOrder.value ==
+                                              ApiCallStatus.success
+                                          ? () => tabController.animateTo(1)
+                                          : () => homeController.placeOrder(
+                                              tabController: tabController),
+                                  style: ElevatedButton.styleFrom(
+                                      disabledBackgroundColor: Colors.grey,
+                                      disabledForegroundColor: maincolor),
+                                  child: homeController.placingOrder.value ==
+                                          ApiCallStatus.success
+                                      ? const Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              'Pay for your order',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w600),
+                                            ),
+                                            SizedBox(
+                                              width: 10,
+                                            ),
+                                            Icon(
+                                              EneftyIcons.arrow_right_4_bold,
+                                              color: Colors.white,
+                                            )
+                                          ],
+                                        )
+                                      : const Text(
+                                          'Place Order',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 16),
+                                        ),
+                                ),
+                              ),
+                            ),
+                ),
               ],
             ),
           )

@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../constants/constants.dart';
+import '../../widgets/animated_widgets/loading.dart';
 import '../../widgets/cached_image_widget_wrapper.dart';
-import '../../widgets/loading.dart';
 
 class RestaurantDetailScreenTopSection extends StatelessWidget {
   final String image;
@@ -37,12 +37,12 @@ class RestaurantDetailScreenTopSection extends StatelessWidget {
                     color: maincolor,
                     shape: BoxShape.circle,
                   ),
-                  child: Center(
+                  child: const Center(
                       child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: EdgeInsets.all(4.0),
                     child: Icon(
                       Icons.arrow_back_ios_new_rounded,
-                      color: secondarycolor,
+                      color: Colors.white,
                     ),
                   )),
                 ),
@@ -51,8 +51,8 @@ class RestaurantDetailScreenTopSection extends StatelessWidget {
             cachedNetworkImageWrapper(
               imageUrl: image,
               imageBuilder: (context, imageProvider) => Container(
-                width: 50,
-                height: 50,
+                width: 40,
+                height: 40,
                 decoration: const BoxDecoration(
                   // color: maincolor,
                   shape: BoxShape.circle,
@@ -66,8 +66,8 @@ class RestaurantDetailScreenTopSection extends StatelessWidget {
                 ),
               ),
               placeholderBuilder: (context, path) => Container(
-                width: 50,
-                height: 50,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   color: Colors.grey.withOpacity(0.3),
                   shape: BoxShape.circle,
@@ -75,7 +75,7 @@ class RestaurantDetailScreenTopSection extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(100),
                   child: const Loading(
-                    size: 40,
+                    size: 30,
                   ),
                 ),
               ),
@@ -120,7 +120,7 @@ class RestaurantDetailScreenTopSection extends StatelessWidget {
                     style: Theme.of(context)
                         .textTheme
                         .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                        ?.copyWith(fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                   const SizedBox(
                     height: 5,
@@ -130,14 +130,14 @@ class RestaurantDetailScreenTopSection extends StatelessWidget {
                     child: AutoSizeText(
                       location,
                       maxLines: 1,
-                      minFontSize: 9,
-                      maxFontSize: 12,
+                      minFontSize: 5,
+                      maxFontSize: 10,
                       stepGranularity: 0.5,
                       overflow: TextOverflow.visible,
                       style: Theme.of(context)
                           .textTheme
                           .bodyMedium
-                          ?.copyWith(color: Colors.grey),
+                          ?.copyWith(color: Colors.grey, fontSize: 10),
                     ),
                   ),
                 ],
@@ -145,21 +145,25 @@ class RestaurantDetailScreenTopSection extends StatelessWidget {
             ),
           ],
         ),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: maincolor.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Center(
-                child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Icon(
-                favorited ? EneftyIcons.heart_bold : EneftyIcons.heart_outline,
-                color: Colors.grey,
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: maincolor.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(15),
               ),
-            )),
+              child: Center(
+                  child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(
+                  favorited
+                      ? EneftyIcons.heart_bold
+                      : EneftyIcons.heart_outline,
+                  color: favorited ? maincolor : Colors.grey,
+                ),
+              )),
+            ),
           ),
         )
       ],

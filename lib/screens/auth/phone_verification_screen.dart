@@ -23,8 +23,8 @@ class PhoneVerificationScreenState extends State<PhoneVerificationScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // Start polling for verification status every 2 seconds
-    _startVerificationPolling();
+    // // Start polling for verification status every 2 seconds
+    // _startVerificationPolling();
   }
 
   @override
@@ -35,11 +35,11 @@ class PhoneVerificationScreenState extends State<PhoneVerificationScreen>
     }
   }
 
-  void _startVerificationPolling() {
-    _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
-      signUpController.checkPhoneVerification();
-    });
-  }
+  // void _startVerificationPolling() {
+  //   _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
+  //     signUpController.checkPhoneVerification();
+  //   });
+  // }
 
   @override
   void dispose() {

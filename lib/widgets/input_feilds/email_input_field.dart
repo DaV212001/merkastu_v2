@@ -1,39 +1,30 @@
 import 'package:flutter/material.dart';
 
-import '../constants/constants.dart';
+import '../../constants/constants.dart';
 
-class CustomInputField extends StatelessWidget {
+class EmailInput extends StatefulWidget {
   final TextEditingController inputController;
-  final String hintText;
-  final String? initialValue;
-  final String? label;
-  final Color primaryColor;
-  final String? Function(String?)? validator;
+  final GlobalKey<FormState>? formKey;
+
   final Function(dynamic val) onChanged;
-  final TextInputType? keyboardType;
-  const CustomInputField(
+
+  const EmailInput(
       {super.key,
       required this.inputController,
-      required this.hintText,
-      this.primaryColor = const Color(0xFF3AE0C4),
-      required this.onChanged,
-      this.validator,
-      this.keyboardType,
-      this.initialValue,
-      this.label});
+      this.formKey,
+      required this.onChanged});
+  @override
+  EmailInputFb1State createState() => EmailInputFb1State();
+}
 
+class EmailInputFb1State extends State<EmailInput> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      controller: inputController,
-      onChanged: onChanged,
-      keyboardType: keyboardType,
-      initialValue: initialValue,
-      style: const TextStyle(fontSize: 14, color: Colors.black),
+      controller: widget.inputController,
+      keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(
-        hintText: hintText,
-        labelText: label,
-        labelStyle: TextStyle(color: maincolor),
+        hintText: 'Enter your email',
         hintStyle: const TextStyle(fontSize: 14),
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(
@@ -64,9 +55,21 @@ class CustomInputField extends StatelessWidget {
           borderRadius: BorderRadius.circular(12.0),
         ),
         errorStyle: const TextStyle(
-            fontFamily: 'Montserrat', fontWeight: FontWeight.w400),
+          fontFamily: 'Montserrat',
+          fontWeight: FontWeight.w400,
+        ),
       ),
-      validator: validator,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      onChanged: widget.onChanged,
+      validator: (value) {
+        if (value!.isEmpty) {
+          return 'Please enter an email';
+        } else if (!RegExp(r'^[a-z]+\.[a-z]+@aastustudent\.edu\.et$')
+            .hasMatch(value)) {
+          return 'Please enter a valid AASTU email address\n(firstname.lastname@aastustudent.edu.et)';
+        }
+        return null;
+      },
     );
   }
 }

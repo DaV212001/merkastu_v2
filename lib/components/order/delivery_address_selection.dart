@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/home_controller.dart';
-import '../../widgets/custom_input_field.dart';
+import '../../widgets/input_feilds/custom_input_field.dart';
 
 class DeliveryAddressSelection extends StatelessWidget {
   const DeliveryAddressSelection({
@@ -25,7 +25,7 @@ class DeliveryAddressSelection extends StatelessWidget {
                 text: homeController.block.value.toString()),
             hintText: 'Enter block number',
             onChanged: (value) {
-              homeController.block.value = int.parse(value);
+              homeController.block.value = value;
             },
             validator: (value) {
               if (!value!.isNumericOnly) {
@@ -49,7 +49,7 @@ class DeliveryAddressSelection extends StatelessWidget {
                 text: homeController.room.value.toString()),
             hintText: 'Enter room number',
             onChanged: (value) {
-              homeController.room.value = int.parse(value);
+              homeController.room.value = value;
             },
             validator: (value) {
               if (!value!.isNumericOnly) {

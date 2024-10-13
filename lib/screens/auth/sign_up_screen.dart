@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:merkastu_v2/constants/pages.dart';
 
 import '../../constants/constants.dart';
 import '../../controllers/auth_controller.dart';
-import '../../widgets/custom_input_field.dart';
-import '../../widgets/loading_animated_button.dart';
-import '../../widgets/password_input_field.dart';
-import 'log_in_screen.dart';
+import '../../widgets/animated_widgets/loading_animated_button.dart';
+import '../../widgets/input_feilds/custom_input_field.dart';
+import '../../widgets/input_feilds/password_input_field.dart';
 
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({super.key});
@@ -258,7 +258,7 @@ class _TabBarAndTabViewsState extends State<TabBarAndTabViews>
                             "Signing up...",
                             style: TextStyle(
                                 color: maincolor,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w600,
                                 fontSize: 16),
                           ),
                         ),
@@ -389,8 +389,7 @@ class PhoneNumberInput extends StatelessWidget {
             child: const Center(
                 child: Text(
               '+251',
-              style:
-                  TextStyle(color: Colors.black, fontWeight: FontWeight.w400),
+              style: TextStyle(fontWeight: FontWeight.w400),
             )),
           ),
         ),
@@ -401,13 +400,14 @@ class PhoneNumberInput extends StatelessWidget {
           flex: 5,
           child: TextFormField(
             keyboardType: TextInputType.number,
+            style: const TextStyle(fontSize: 12),
             inputFormatters: <TextInputFormatter>[
               FilteringTextInputFormatter.digitsOnly
             ],
             controller: textEditingController,
             decoration: InputDecoration(
               hintText: '9XX-XXX-XXX',
-              hintStyle: const TextStyle(fontSize: 14),
+              hintStyle: const TextStyle(fontSize: 12),
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(
                   color: maincolor,
@@ -467,19 +467,14 @@ Row buildFooter(BuildContext context) {
     GestureDetector(
       onTap: () {
         // Navigate to the RegisterScreen
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
-          ),
-        );
+        Get.offAndToNamed(Routes.loginRoute);
       },
       // Add a text widget to display "Register" as a link
       child: Text(" Login",
           style: TextStyle(
               color: maincolor,
               fontFamily: 'Montserrat',
-              fontWeight: FontWeight.bold)),
+              fontWeight: FontWeight.w600)),
     )
   ]);
 }

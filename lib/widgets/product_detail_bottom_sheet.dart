@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:merkastu_v2/constants/constants.dart';
 import 'package:merkastu_v2/widgets/cached_image_widget_wrapper.dart';
-import 'package:merkastu_v2/widgets/store_card.dart';
+import 'package:merkastu_v2/widgets/cards/store_card.dart';
 
 import '../controllers/home_controller.dart';
 import '../models/product.dart';
-import 'loading.dart';
+import 'animated_widgets/loading.dart';
 
 class ProductDetail extends StatefulWidget {
   final Product product;
@@ -25,6 +25,7 @@ class _ProductDetailState extends State<ProductDetail> {
   @override
   Widget build(BuildContext context) {
     return BottomSheet(
+      backgroundColor: Theme.of(context).cardColor,
       onClosing: () {},
       builder: (context) {
         var addonsPrice = (widget.product.addons!
@@ -108,26 +109,25 @@ class _ProductDetailState extends State<ProductDetail> {
                                     widget.product.name!,
                                     style: Theme.of(context)
                                         .textTheme
-                                        .titleMedium
-                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                        .titleSmall
+                                        ?.copyWith(fontWeight: FontWeight.w600),
                                   ),
-                                  const SizedBox(height: 2),
                                   SizedBox(
                                     width:
-                                        MediaQuery.of(context).size.width * 0.5,
+                                        MediaQuery.of(context).size.width * 0.4,
                                     child: AutoSizeText(
                                       homeController.selectedStore.value.name!,
                                       maxLines: 1,
-                                      minFontSize: 9,
-                                      maxFontSize: 12,
+                                      minFontSize: 5,
+                                      maxFontSize: 10,
                                       stepGranularity: 0.5,
-                                      overflow: TextOverflow.visible,
+                                      overflow: TextOverflow.ellipsis,
                                       style: Theme.of(context)
                                           .textTheme
-                                          .bodyMedium
+                                          .bodySmall
                                           ?.copyWith(
                                             color: maincolor,
-                                            fontWeight: FontWeight.bold,
+                                            fontWeight: FontWeight.w600,
                                           ),
                                     ),
                                   ),
@@ -137,29 +137,33 @@ class _ProductDetailState extends State<ProductDetail> {
                                     maxLines: 2,
                                     style: Theme.of(context)
                                         .textTheme
-                                        .titleMedium
-                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                        .bodyMedium
+                                        ?.copyWith(fontWeight: FontWeight.w600),
                                   )
                                 ],
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: maincolor.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: const Center(
-                                    child: Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Icon(
-                                    false
-                                        ? EneftyIcons.heart_bold
-                                        : EneftyIcons.heart_outline,
-                                    color: Colors.grey,
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: maincolor.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
-                                )),
+                                  child: Center(
+                                      child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Icon(
+                                      widget.product.favorited ?? false
+                                          ? EneftyIcons.heart_bold
+                                          : EneftyIcons.heart_outline,
+                                      color: widget.product.favorited ?? false
+                                          ? maincolor
+                                          : Colors.grey,
+                                    ),
+                                  )),
+                                ),
                               ),
                             )
                           ],
@@ -171,12 +175,13 @@ class _ProductDetailState extends State<ProductDetail> {
                           'Description',
                           style: Theme.of(context)
                               .textTheme
-                              .bodyLarge
-                              ?.copyWith(fontWeight: FontWeight.bold),
+                              .bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.only(
+                            left: 8.0, right: 8.0, bottom: 8.0),
                         child: SizedBox(
                           width: MediaQuery.of(context).size.height * 0.7,
                           child: Text(
@@ -186,8 +191,8 @@ class _ProductDetailState extends State<ProductDetail> {
                             softWrap: true,
                             style: Theme.of(context)
                                 .textTheme
-                                .bodySmall
-                                ?.copyWith(color: Colors.black45),
+                                .bodySmall!
+                                .copyWith(fontSize: 9),
                           ),
                         ),
                       ),
@@ -202,14 +207,15 @@ class _ProductDetailState extends State<ProductDetail> {
                               'Addons',
                               style: Theme.of(context)
                                   .textTheme
-                                  .bodyLarge
-                                  ?.copyWith(fontWeight: FontWeight.bold),
+                                  .bodyMedium
+                                  ?.copyWith(fontWeight: FontWeight.w600),
                             ),
-                            Text('Price: ETB $addonsPrice',
+                            Text(
+                                'Price: ETB ${addonsPrice.toDouble().toStringAsFixed(2)}',
                                 style: Theme.of(context)
                                     .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(fontWeight: FontWeight.bold)),
+                                    .bodySmall
+                                    ?.copyWith(fontWeight: FontWeight.w600)),
                           ],
                         ),
                       ),
@@ -234,17 +240,26 @@ class _ProductDetailState extends State<ProductDetail> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(addon.name!),
+                                    Text(
+                                      addon.name!,
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
                                     Row(
                                       children: [
-                                        Text('ETB ${addon.price}'),
+                                        Text(
+                                          'ETB ${addon.price}',
+                                          style: const TextStyle(fontSize: 13),
+                                        ),
                                         if (addon.amount! > 0)
                                           Row(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.spaceBetween,
                                             children: [
                                               IconButton(
-                                                icon: const Icon(Icons.remove),
+                                                icon: const Icon(
+                                                  Icons.remove,
+                                                  size: 16,
+                                                ),
                                                 onPressed: () {
                                                   setState(() {
                                                     if (addon.amount! > 0) {
@@ -255,9 +270,16 @@ class _ProductDetailState extends State<ProductDetail> {
                                                   homeController.cart.refresh();
                                                 },
                                               ),
-                                              Text('${addon.amount}'),
+                                              Text(
+                                                '${addon.amount}',
+                                                style: const TextStyle(
+                                                    fontSize: 13),
+                                              ),
                                               IconButton(
-                                                icon: const Icon(Icons.add),
+                                                icon: const Icon(
+                                                  Icons.add,
+                                                  size: 16,
+                                                ),
                                                 onPressed: () {
                                                   setState(() {
                                                     addon.amount =
@@ -311,7 +333,7 @@ class _ProductDetailState extends State<ProductDetail> {
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyMedium
-                                    ?.copyWith(fontWeight: FontWeight.bold),
+                                    ?.copyWith(fontWeight: FontWeight.w600),
                               ),
                               Text(
                                 'ETB $totalPriceForSpecificProduct',
@@ -320,7 +342,7 @@ class _ProductDetailState extends State<ProductDetail> {
                                     .bodyMedium
                                     ?.copyWith(
                                         color: maincolor,
-                                        fontWeight: FontWeight.bold),
+                                        fontWeight: FontWeight.w600),
                               )
                             ],
                           ),
@@ -348,11 +370,11 @@ class _ProductDetailState extends State<ProductDetail> {
                                           color: maincolor,
                                           shape: BoxShape.circle,
                                         ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(5.0),
+                                        child: const Padding(
+                                          padding: EdgeInsets.all(5.0),
                                           child: Icon(
                                             Icons.remove,
-                                            color: secondarycolor,
+                                            color: Colors.white,
                                           ),
                                         )),
                                   ),
@@ -372,11 +394,11 @@ class _ProductDetailState extends State<ProductDetail> {
                                           color: maincolor,
                                           shape: BoxShape.circle,
                                         ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(5.0),
+                                        child: const Padding(
+                                          padding: EdgeInsets.all(5.0),
                                           child: Icon(
                                             Icons.add,
-                                            color: secondarycolor,
+                                            color: Colors.white,
                                           ),
                                         )),
                                   ),
@@ -406,7 +428,8 @@ class _ProductDetailState extends State<ProductDetail> {
                                               .contains(widget.product)
                                           ? 'Remove from cart'
                                           : 'Add to cart',
-                                      style: TextStyle(color: secondarycolor)),
+                                      style:
+                                          const TextStyle(color: Colors.white)),
                                 )),
                           ),
                         )

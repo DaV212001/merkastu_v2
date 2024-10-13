@@ -1,5 +1,4 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:logger/logger.dart';
 
 import '../constants/assets.dart';
 import 'error_data.dart';
@@ -21,8 +20,8 @@ class ErrorUtil {
     print("Here in error Util $error");
 
     var connectivityResult = await (Connectivity().checkConnectivity());
-    Logger().d(connectivityResult);
-    Logger().d(connectivityResult[0] == ConnectivityResult.none);
+    // Logger().d(connectivityResult);
+    // Logger().d(connectivityResult[0] == ConnectivityResult.none);
     if (connectivityResult[0] == ConnectivityResult.none) {
       return ErrorData(
         title: "No Internet Connection",
