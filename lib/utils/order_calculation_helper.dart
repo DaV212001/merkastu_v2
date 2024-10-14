@@ -1,3 +1,4 @@
+import '../models/order.dart';
 import '../models/product.dart';
 import '../models/store.dart';
 
@@ -76,5 +77,54 @@ class CalculationHelper {
       }
     }
     return totalProductPrice;
+  }
+}
+
+class OrdersHelper {
+  static Map<DateTime, List<Order>> groupOrdersByDate(List<Order> orders) {
+    Map<DateTime, List<Order>> groupedOrders = {};
+
+    for (var order in orders) {
+      // Convert UTC time to Ethiopian time (UTC+3)
+      final ethiopianDateTime =
+          order.createdAt?.toUtc().add(const Duration(hours: 3));
+
+      // Create a DateTime key with only the year, month, and day part (strip the time)
+      DateTime dateKey = DateTime(
+        ethiopianDateTime!.year,
+        ethiopianDateTime.month,
+        ethiopianDateTime.day,
+      );
+
+      // Add the order to the corresponding date group
+      if (!groupedOrders.containsKey(dateKey)) {
+        groupedOrders[dateKey] = [];
+      }
+      groupedOrders[dateKey]!.add(order);
+    }
+
+    // Sort the grouped orders by date in descending order (most recent first)
+    final sortedGroupedOrders = Map<DateTime, List<Order>>.fromEntries(
+      groupedOrders.entries.toList()..sort((a, b) => b.key.compareTo(a.key)),
+    );
+
+    // Sort the orders within each group by createdAt in descending order
+    sortedGroupedOrders.forEach((date, ordersList) {
+      ordersList.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
+    });
+
+    return sortedGroupedOrders;
+  }
+
+  static Map<String, List<Product>> groupOrderProductsByStoreId(
+      List<Product> products) {
+    Map<String, List<Product>> groupedOrderProducts = {};
+    for (var product in products) {
+      if (!groupedOrderProducts.containsKey(product.storeId)) {
+        groupedOrderProducts[product.storeId!] = [];
+      }
+      groupedOrderProducts[product.storeId]!.add(product);
+    }
+    return groupedOrderProducts;
   }
 }

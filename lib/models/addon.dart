@@ -17,6 +17,22 @@ class Addon {
     };
   }
 
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is Addon && other.id == id && other.amount == amount;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        name.hashCode ^
+        price.hashCode ^
+        productId.hashCode ^
+        amount.hashCode;
+  }
+
   factory Addon.fromJson(Map<String, dynamic> json) {
     return Addon(
       id: json['id'],

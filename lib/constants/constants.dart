@@ -6,10 +6,10 @@ import 'package:retry/retry.dart';
 import '../controllers/theme_mode_controller.dart';
 
 String kApiBaseUrl = 'https://merkastu.endevour.org';
-String kStoreImageBaseUrl =
-    'https://merkastu.endevour.org/public/store-images/';
-String kProductImagebaseUrl =
-    'https://merkastu.endevour.org/public/product-images/';
+String kStoreImageBaseUrl = '$kApiBaseUrl/public/store-images/';
+String kProductImagebaseUrl = '$kApiBaseUrl/public/product-images/';
+String kDeliveryPersonProfileImageBaseUrl =
+    '$kApiBaseUrl/public/delivery-person-images/';
 
 final client = HttpClient();
 const retryOptions = RetryOptions(

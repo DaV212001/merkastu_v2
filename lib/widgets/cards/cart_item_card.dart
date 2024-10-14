@@ -15,6 +15,10 @@ class CartItemCard extends StatelessWidget {
   final VoidCallback onAdd;
   final VoidCallback onRemove;
   final VoidCallback onDuplicate;
+  final VoidCallback onImageTap;
+  final bool? isSelected;
+  final bool favorited;
+  final Function()? onHeartTap;
   const CartItemCard({
     super.key,
     required this.image,
@@ -25,6 +29,10 @@ class CartItemCard extends StatelessWidget {
     required this.onRemove,
     required this.amount,
     required this.onDuplicate,
+    this.isSelected,
+    required this.onImageTap,
+    required this.favorited,
+    this.onHeartTap,
   });
 
   @override
@@ -44,32 +52,54 @@ class CartItemCard extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  cachedNetworkImageWrapper(
-                    imageUrl: image,
-                    imageBuilder: (context, imageProvider) =>
-                        SmallCardImageHolder(
-                      image: Image.network(
-                        image,
-                        width: MediaQuery.of(context).size.height * 0.12,
-                        height: MediaQuery.of(context).size.height * 0.12,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    placeholderBuilder: (context, path) => Container(
-                        width: MediaQuery.of(context).size.height * 0.12,
-                        height: MediaQuery.of(context).size.height * 0.12,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color: Colors.grey.withOpacity(0.2)),
-                        child: const Loading()),
-                    errorWidgetBuilder: (context, path, obj) =>
-                        SmallCardImageHolder(
-                      image: Image.asset(
-                        'assets/images/logo.png',
-                        width: MediaQuery.of(context).size.height * 0.12,
-                        height: MediaQuery.of(context).size.height * 0.12,
-                        fit: BoxFit.cover,
-                      ),
+                  GestureDetector(
+                    onTap: onImageTap,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        cachedNetworkImageWrapper(
+                          imageUrl: image,
+                          imageBuilder: (context, imageProvider) =>
+                              SmallCardImageHolder(
+                            image: Image.network(
+                              image,
+                              width: MediaQuery.of(context).size.height * 0.12,
+                              height: MediaQuery.of(context).size.height * 0.12,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          placeholderBuilder: (context, path) => Container(
+                              width: MediaQuery.of(context).size.height * 0.12,
+                              height: MediaQuery.of(context).size.height * 0.12,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  color: Colors.grey.withOpacity(0.2)),
+                              child: const Loading()),
+                          errorWidgetBuilder: (context, path, obj) =>
+                              SmallCardImageHolder(
+                            image: Image.asset(
+                              'assets/images/logo.png',
+                              width: MediaQuery.of(context).size.height * 0.12,
+                              height: MediaQuery.of(context).size.height * 0.12,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        if (isSelected == true)
+                          Container(
+                            width: MediaQuery.of(context).size.height * 0.12,
+                            height: MediaQuery.of(context).size.height * 0.12,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                // border: Border.all(color: Colors.white, width: 2),
+                                color: Colors.white.withOpacity(0.65)),
+                            child: Icon(
+                              EneftyIcons.tick_circle_bold,
+                              color: maincolor,
+                              size: 50,
+                            ),
+                          )
+                      ],
                     ),
                   ),
                   Expanded(
@@ -177,6 +207,20 @@ class CartItemCard extends StatelessWidget {
             child: Icon(
               EneftyIcons.add_circle_outline,
               color: Colors.grey,
+            ),
+          ),
+        ),
+      ),
+      Positioned(
+        top: 10,
+        right: 10,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: GestureDetector(
+            onTap: onHeartTap,
+            child: Icon(
+              favorited ? EneftyIcons.heart_bold : EneftyIcons.heart_outline,
+              color: maincolor,
             ),
           ),
         ),

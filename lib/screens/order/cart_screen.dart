@@ -1,4 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:merkastu_v2/constants/assets.dart';
@@ -46,36 +47,48 @@ class CartScreen extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
         actions: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              Obx(() => Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                          color: maincolor,
-                          borderRadius: BorderRadius.circular(10)),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.3,
-                          child: AutoSizeText(
-                            'Total: ETB ${homeController.totalProductPrice}',
-                            maxLines: 1,
-                            minFontSize: 5,
-                            maxFontSize: 10,
-                            stepGranularity: 0.5,
-                            overflow: TextOverflow.visible,
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600),
-                          ),
+          Obx(() => homeController.listOfSelectedProductsInCart.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                        color: maincolor,
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.3,
+                        child: AutoSizeText(
+                          'Total: ETB ${homeController.totalProductPrice}',
+                          maxLines: 1,
+                          minFontSize: 5,
+                          maxFontSize: 10,
+                          textAlign: TextAlign.center,
+                          stepGranularity: 0.5,
+                          overflow: TextOverflow.visible,
+                          style: const TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),
-                  ))
-            ],
-          )
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: GestureDetector(
+                    onTap: () {
+                      homeController.removeProductsFromCart(
+                          homeController.listOfSelectedProductsInCart,
+                          fromCartList: true);
+                      homeController.listOfSelectedProductsInCart.clear();
+                    },
+                    child: Icon(
+                      EneftyIcons.trash_bold,
+                      color: maincolor,
+                      size: 30,
+                    ),
+                  ),
+                ))
         ],
       ),
       body: Column(
@@ -125,45 +138,69 @@ class CartScreen extends StatelessWidget {
                                 itemCount: storeProducts.length,
                                 itemBuilder: (context, productIndex) {
                                   var product = storeProducts[productIndex];
-                                  return GestureDetector(
-                                    onTap: () {
-                                      Get.bottomSheet(
-                                          ProductDetail(product: product));
-                                    },
-                                    child: Dismissible(
-                                      key: UniqueKey(),
-                                      onDismissed: (direction) {
-                                        homeController.removeProductFromCart(
-                                            product,
-                                            fromCartList: true);
-                                      },
-                                      background: Container(color: Colors.red),
-                                      child: CartItemCard(
-                                        // Build your cart item with product details here
-                                        image: product.image!,
-                                        name: product.name!,
-                                        description: product.description!,
-                                        price: homeController
-                                            .calculateSpecificProductPrice(
-                                                product),
-                                        onAdd: () => homeController
-                                            .addProductAmount(product),
-                                        onDuplicate: () => homeController
-                                            .duplicateProductToCart(product),
-                                        onRemove: () {
-                                          if (product.amount == 1) {
+                                  var favorited =
+                                      (product.favorited ?? false).obs;
+                                  return Obx(() => GestureDetector(
+                                        onTap: () {
+                                          Get.bottomSheet(
+                                              ProductDetail(product: product));
+                                        },
+                                        child: Dismissible(
+                                          key: UniqueKey(),
+                                          onDismissed: (direction) {
                                             homeController
                                                 .removeProductFromCart(product,
                                                     fromCartList: true);
-                                          } else {
-                                            homeController
-                                                .removeProductAmount(product);
-                                          }
-                                        },
-                                        amount: product.amount.toString(),
-                                      ),
-                                    ),
-                                  );
+                                          },
+                                          background:
+                                              Container(color: Colors.red),
+                                          child: CartItemCard(
+                                            favorited: favorited.value,
+                                            onHeartTap: () {
+                                              if (product.favorited!) {
+                                                homeController
+                                                    .unfavoriteProduct(product);
+                                              } else {
+                                                homeController
+                                                    .favoriteProduct(product);
+                                              }
+                                            },
+                                            // Build your cart item with product details here
+                                            image: product.image!,
+                                            name: product.name!,
+                                            description: product.description!,
+                                            price: homeController
+                                                .calculateSpecificProductPrice(
+                                                    product),
+                                            onAdd: () => homeController
+                                                .addProductAmount(product),
+                                            onDuplicate: () => homeController
+                                                .duplicateProductToCart(
+                                                    product),
+                                            onRemove: () {
+                                              if (product.amount == 1) {
+                                                homeController
+                                                    .removeProductFromCart(
+                                                        product,
+                                                        fromCartList: true);
+                                              } else {
+                                                homeController
+                                                    .removeProductAmount(
+                                                        product);
+                                              }
+                                            },
+                                            amount: product.amount.toString(),
+                                            onImageTap: () {
+                                              homeController
+                                                  .toggleSelectionInCart(
+                                                      product);
+                                            },
+                                            isSelected: homeController
+                                                .listOfSelectedProductsInCart
+                                                .contains(product),
+                                          ),
+                                        ),
+                                      ));
                                 },
                               ),
                             ),
@@ -182,7 +219,7 @@ class CartScreen extends StatelessWidget {
                     height: 45,
                     child: ElevatedButton(
                       onPressed: () {
-                        UserController.getWalletBallance();
+                        UserController.getWalletBalance();
                         Get.toNamed(Routes.checkoutRoute);
                       },
                       child: const Text(

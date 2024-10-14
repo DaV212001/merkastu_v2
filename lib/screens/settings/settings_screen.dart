@@ -11,6 +11,7 @@ import 'package:merkastu_v2/constants/constants.dart';
 import 'package:merkastu_v2/constants/pages.dart';
 import 'package:merkastu_v2/controllers/auth_controller.dart';
 import 'package:merkastu_v2/controllers/theme_mode_controller.dart';
+import 'package:merkastu_v2/widgets/cards/profile_list_card.dart';
 import 'package:merkastu_v2/widgets/wallet_balance.dart';
 
 import '../../models/user.dart';
@@ -23,41 +24,64 @@ class SettingsScreen extends StatelessWidget {
       'name': 'Profile',
       'icon': EneftyIcons.profile_circle_bold,
       'onTap': () => Get.toNamed(Routes.profileRoute),
+      'isFirstTile': true,
+      'isLastTile': false,
     },
     {
-      'name': 'Help and support',
+      'name': 'My Wallet',
+      'icon': EneftyIcons.wallet_2_bold,
+      'onTap': () => Get.toNamed(Routes.walletHistoryRoute),
+      'isFirstTile': false,
+      'isLastTile': true,
+    },
+    {
+      'name': 'Help and Support',
       'icon': Ionicons.help_circle,
       'onTap': () {},
+      'isFirstTile': true,
+      'isLastTile': false,
     },
     {
-      'name': 'About us',
+      'name': 'About Us',
       'icon': EneftyIcons.info_circle_bold,
       'onTap': () => Get.toNamed(Routes.aboutRoute),
+      'isFirstTile': false,
+      'isLastTile': true,
     },
     {
-      'name': 'Terms and conditions',
+      'name': 'Terms and Conditions',
       'icon': Ionicons.document_text,
       'onTap': () => Get.toNamed(Routes.termsRoute),
+      'isFirstTile': true,
+      'isLastTile': false,
     },
     {
-      'name': 'Privacy policy',
+      'name': 'Privacy Policy',
       'icon': Ionicons.lock_closed,
       'onTap': () => Get.toNamed(Routes.privacyRoute),
+      'isFirstTile': false,
+      'isLastTile': false,
     },
     {
-      'name': 'Refund policy',
+      'name': 'Refund Policy',
       'icon': EneftyIcons.money_change_bold,
       'onTap': () {},
+      'isFirstTile': false,
+      'isLastTile': false,
     },
     {
-      'name': 'Cancellation policy',
+      'name': 'Cancellation Policy',
       'icon': EneftyIcons.stop_bold,
       'onTap': () {},
+      'isFirstTile': false,
+      'isLastTile': false,
     },
     {
-      'name': 'Shipping policy',
+      'name': 'Shipping Policy',
       'icon': EneftyIcons.car_bold,
       'onTap': () {},
+      'isFirstTile': false,
+      'isLastTile': true,
     }
   ];
   @override
@@ -216,16 +240,12 @@ class SettingsScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   children: [
-                    ...routesList.map((e) => ListTile(
-                          leading: Icon(
-                            e['icon'],
-                            size: 25,
-                          ),
-                          title: Text(
-                            e['name'],
-                            style: const TextStyle(fontSize: 12),
-                          ),
+                    ...routesList.map((e) => ProfileListCard(
+                          icon: e['icon'],
+                          name: e['name'],
                           onTap: e['onTap'],
+                          isFirstTile: e['isFirstTile'],
+                          isLastTile: e['isLastTile'],
                         )),
                   ],
                 ),

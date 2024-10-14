@@ -61,6 +61,7 @@ class WalletBalance extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
                           EneftyIcons.wallet_2_bold,
@@ -83,11 +84,12 @@ class WalletBalance extends StatelessWidget {
                           // : Colors.white
                           ,
                         ),
-                        Expanded(
+                        Flexible(
+                          fit: FlexFit.loose,
                           child: SizedBox(
                             width: MediaQuery.of(context).size.width * 0.11,
                             child: AutoSizeText(
-                              UserController.walletBallance.value
+                              UserController.walletBalance.value
                                   .toStringAsFixed(2),
                               // '100',
                               maxLines: 1,

@@ -280,7 +280,7 @@ class UserController extends GetxController
       isLoggedIn.value = true;
       isLoggedIn.refresh();
       Logger().d('Logged in: ${isLoggedIn.value}');
-      getWalletBallance();
+      getWalletBalance();
     } else {
       isLoggedIn.value = false;
     }
@@ -313,7 +313,7 @@ class UserController extends GetxController
       Logger().d(response.data);
       if ((response.statusCode == 200 || response.statusCode == 201) &&
           response.data['status'] == true) {
-        getWalletBallance();
+        getWalletBalance();
         Get.back();
         amount.value = '';
         transactionId.value = '';
@@ -335,16 +335,17 @@ class UserController extends GetxController
         errorString = 'No internet connection';
       }
       if (e is FormatException) {
-        errorString = 'Unexpected error occured, please try again';
+        errorString = 'Unexpected error occurred, please try again';
       }
       Get.snackbar('Error', errorString);
       fillingWallet.value = false;
     }
   }
 
-  static RxDouble walletBallance = 0.00.obs;
+  static RxDouble walletBalance = 0.00.obs;
   static var loadingBalance = false.obs;
-  static getWalletBallance() async {
+
+  static getWalletBalance() async {
     loadingBalance.value = true;
     dio.Response response = dio.Response(requestOptions: dio.RequestOptions());
     try {
@@ -356,7 +357,7 @@ class UserController extends GetxController
           ));
       Logger().d(response.data);
       if (response.statusCode == 200 && response.data['status'] == true) {
-        walletBallance.value =
+        walletBalance.value =
             (response.data['data']['balance'] ?? 0).toDouble();
       } else {
         Exception(response.data['message']);

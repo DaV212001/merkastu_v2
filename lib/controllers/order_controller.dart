@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:merkastu_v2/config/storage_config.dart';
+import 'package:merkastu_v2/controllers/socket_controller.dart';
 import 'package:merkastu_v2/utils/error_utils.dart';
 
 import '../config/dio_config.dart';
@@ -13,18 +14,42 @@ import '../models/store.dart';
 import '../utils/api_call_status.dart';
 import '../utils/error_data.dart';
 import '../utils/order_calculation_helper.dart';
+import '../utils/order_status.dart';
 import '../utils/payment_methods.dart';
 
 class OrderController extends GetxController with GetTickerProviderStateMixin {
   late TabController orderListTabController;
   late TabController orderDetailTabController;
+  final socketController = Get.find<SocketController>(tag: 'socket');
   @override
   void onInit() {
     fetchActiveOrders();
     fetchHistoryOrders();
     orderListTabController = TabController(length: 2, vsync: this);
     orderDetailTabController = TabController(length: 2, vsync: this);
+    socketController.setEventHandler(orderSocketEventHandler);
     super.onInit();
+  }
+
+  void orderSocketEventHandler(socketMessage) {
+    String acceptedOrderId = socketMessage['order_id'];
+    Map<String, dynamic> acceptorDeliveryPerson =
+        socketMessage['delivery_person'];
+    for (Order order in activeOrdersList) {
+      if (order.id == acceptedOrderId) {
+        order.orderStatus = OrderStatus.accepted;
+        order.deliveryPerson = DeliveryPerson.fromJson(acceptorDeliveryPerson);
+      }
+    }
+    activeOrdersList.refresh();
+    filteredActiveOrdersList.value = List.from(activeOrdersList);
+    filteredActiveOrdersList.refresh();
+  }
+
+  void orderDeliverySocketEmitter() {
+    socketController.socket.value.emit("userRecievedOrder", {
+      'order_id': selectedOrder.value.id,
+    });
   }
 
   var activeOrdersList = <Order>[].obs;
@@ -172,6 +197,8 @@ class OrderController extends GetxController with GetTickerProviderStateMixin {
     }
   }
 
+  var selectedPaymentMethod = PaymentMethod.none.obs;
+
   var verifyingPayment = false.obs;
   var transactionId = ''.obs;
   void verifyPayment() async {
@@ -254,54 +281,5 @@ class OrderController extends GetxController with GetTickerProviderStateMixin {
   void onClose() {
     orderListTabController.dispose();
     super.onClose();
-  }
-}
-
-class OrdersHelper {
-  static Map<DateTime, List<Order>> groupOrdersByDate(List<Order> orders) {
-    Map<DateTime, List<Order>> groupedOrders = {};
-
-    for (var order in orders) {
-      // Convert UTC time to Ethiopian time (UTC+3)
-      final ethiopianDateTime =
-          order.createdAt?.toUtc().add(const Duration(hours: 3));
-
-      // Create a DateTime key with only the year, month, and day part (strip the time)
-      DateTime dateKey = DateTime(
-        ethiopianDateTime!.year,
-        ethiopianDateTime.month,
-        ethiopianDateTime.day,
-      );
-
-      // Add the order to the corresponding date group
-      if (!groupedOrders.containsKey(dateKey)) {
-        groupedOrders[dateKey] = [];
-      }
-      groupedOrders[dateKey]!.add(order);
-    }
-
-    // Sort the grouped orders by date in descending order (most recent first)
-    final sortedGroupedOrders = Map<DateTime, List<Order>>.fromEntries(
-      groupedOrders.entries.toList()..sort((a, b) => b.key.compareTo(a.key)),
-    );
-
-    // Sort the orders within each group by createdAt in descending order
-    sortedGroupedOrders.forEach((date, ordersList) {
-      ordersList.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
-    });
-
-    return sortedGroupedOrders;
-  }
-
-  static Map<String, List<Product>> groupOrderProductsByStoreId(
-      List<Product> products) {
-    Map<String, List<Product>> groupedOrderProducts = {};
-    for (var product in products) {
-      if (!groupedOrderProducts.containsKey(product.storeId)) {
-        groupedOrderProducts[product.storeId!] = [];
-      }
-      groupedOrderProducts[product.storeId]!.add(product);
-    }
-    return groupedOrderProducts;
   }
 }

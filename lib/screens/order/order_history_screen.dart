@@ -4,7 +4,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:logger/logger.dart';
 import 'package:merkastu_v2/constants/assets.dart';
 import 'package:merkastu_v2/constants/pages.dart';
 import 'package:merkastu_v2/controllers/main_layout_controller.dart';
@@ -222,7 +221,6 @@ class ActiveOrdersTab extends StatelessWidget {
   };
   @override
   Widget build(BuildContext context) {
-    Logger().d(orderController.groupedActiveOrders);
     return RefreshIndicator(
       onRefresh: () => orderController.fetchActiveOrders(),
       child: SingleChildScrollView(

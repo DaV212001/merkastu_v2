@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:merkastu_v2/constants/constants.dart';
 import 'package:merkastu_v2/models/addon.dart';
 
@@ -12,6 +13,7 @@ class Product {
   final List<Addon>? addons;
   int? amount = 1;
   bool? favorited = false;
+  bool? isSelected = false;
 
   Product(
       {this.id,
@@ -45,6 +47,12 @@ class Product {
               .toList()
           : []
     };
+  }
+
+  bool isTheSameAs(Product product) {
+    bool isSame = (id == product.id &&
+        const UnorderedIterableEquality().equals(addons, product.addons));
+    return isSame;
   }
 
   factory Product.fromJson(Map<String, dynamic> json) {

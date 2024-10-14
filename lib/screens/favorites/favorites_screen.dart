@@ -20,7 +20,8 @@ import '../../widgets/shimmers/shimmering_product_card.dart';
 import '../../widgets/shimmers/shimmering_store_card.dart';
 
 class FavoritesScreen extends StatelessWidget {
-  final FavoritesController controller = Get.put(FavoritesController());
+  final FavoritesController controller =
+      Get.put(FavoritesController(), tag: 'favorites');
   final animationsMap = {
     'containerOnPageLoadAnimation': AnimationInfo(
       trigger: AnimationTrigger.onPageLoad,
@@ -89,7 +90,7 @@ class FavoritesScreen extends StatelessWidget {
                         ? ErrorCard(
                             errorData: ErrorData(
                                 title: '',
-                                body: 'No restaurants found',
+                                body: 'No saved restaurants found',
                                 image: Assets.empty,
                                 buttonText: 'Retry'),
                             refresh: controller.fetchFavoritedStores,
@@ -162,7 +163,7 @@ class FavoritesScreen extends StatelessWidget {
                         ? ErrorCard(
                             errorData: ErrorData(
                               title: '',
-                              body: 'No products found',
+                              body: 'No saved products found',
                               image: Assets.empty,
                               buttonText: 'Retry',
                             ),
@@ -194,6 +195,7 @@ class FavoritesScreen extends StatelessWidget {
                                         .filteredProductList[index].price!
                                         .toString(),
                                     favorited: true,
+                                    onImageTap: () {},
                                   ),
                                 ).animateOnPageLoad(animationsMap[
                                     'containerOnPageLoadAnimation']!);

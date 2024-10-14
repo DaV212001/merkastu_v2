@@ -88,7 +88,13 @@ class FavoritesController extends GetxController
         filteredStoreList.value = List.from(storeList);
         storeLoadingStatus.value = ApiCallStatus.success;
       } else {
-        throw Exception(response.data);
+        if (response.data['message'] == 'No saved stores found') {
+          storeList.value = <Store>[];
+          filteredStoreList.value = List.from(storeList);
+          storeLoadingStatus.value = ApiCallStatus.success;
+        } else {
+          throw Exception(response.data);
+        }
       }
     } catch (e, stack) {
       Logger().t(e, stackTrace: stack);
@@ -144,7 +150,13 @@ class FavoritesController extends GetxController
         filteredProductList.value = List.from(productList);
         productLoadingStatus.value = ApiCallStatus.success;
       } else {
-        throw Exception(response.data);
+        if (response.data['message'] == 'No saved products found') {
+          productList.value = <Product>[];
+          filteredProductList.value = List.from(productList);
+          productLoadingStatus.value = ApiCallStatus.success;
+        } else {
+          throw Exception(response.data);
+        }
       }
     } catch (e, stack) {
       Logger().t(e, stackTrace: stack);

@@ -46,11 +46,13 @@ class Order {
   OrderStatus? orderStatus;
   final String? deliveryBlock;
   final String? deliveryRoom;
+  DeliveryPerson? deliveryPerson;
   final DateTime? createdAt;
   final DateTime? paidAt;
   final List<StoreSmall>? stores;
 
   Order({
+    this.deliveryPerson,
     this.id,
     this.totalOrders,
     this.orderPrice,
@@ -76,6 +78,7 @@ class Order {
       totalOrders: json['total_orders'],
       orderPrice: json['order_price'].toDouble(),
       deliveryFee: json['delivery_fee'].toDouble(),
+      deliveryPerson: json['delivery_person'],
       totalPrice: json['total_price'].toDouble(),
       payment: PaymentMethodExtension.fromName(json['payment_method']),
       orderStatus: OrderStatusExtension.fromName(json['order_status']),
@@ -107,5 +110,21 @@ class Order {
       'paid_at': paidAt?.toIso8601String(),
       'stores': stores?.map((store) => store.toJson()).toList(),
     };
+  }
+}
+
+class DeliveryPerson {
+  final String? name;
+  final String? phone;
+  final String? image;
+
+  DeliveryPerson({this.name, this.phone, this.image});
+
+  factory DeliveryPerson.fromJson(Map<String, dynamic> json) {
+    return DeliveryPerson(
+      name: json['name'],
+      phone: json['phone'],
+      image: json['image'],
+    );
   }
 }

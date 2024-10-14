@@ -13,6 +13,9 @@ class ProductCard extends StatelessWidget {
   final String price;
   final bool favorited;
   final Function()? onHeartTap;
+  final VoidCallback onImageTap;
+  final bool? isSelected;
+  final bool? forGhost;
   const ProductCard({
     super.key,
     required this.image,
@@ -21,6 +24,9 @@ class ProductCard extends StatelessWidget {
     required this.price,
     required this.favorited,
     this.onHeartTap,
+    required this.onImageTap,
+    this.isSelected,
+    this.forGhost,
   });
 
   @override
@@ -41,33 +47,52 @@ class ProductCard extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    cachedNetworkImageWrapper(
-                      imageUrl: image,
-                      imageBuilder: (context, imageProvider) =>
-                          SmallCardImageHolder(
-                        image: Image.network(
-                          image,
-                          width: MediaQuery.of(context).size.height * 0.12,
-                          height: MediaQuery.of(context).size.height * 0.12,
-                          fit: BoxFit.cover,
+                    GestureDetector(
+                      onTap: onImageTap,
+                      child: Stack(alignment: Alignment.center, children: [
+                        cachedNetworkImageWrapper(
+                          imageUrl: image,
+                          imageBuilder: (context, imageProvider) =>
+                              SmallCardImageHolder(
+                            image: Image.network(
+                              image,
+                              width: MediaQuery.of(context).size.height * 0.12,
+                              height: MediaQuery.of(context).size.height * 0.12,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          placeholderBuilder: (context, path) => Container(
+                              width: MediaQuery.of(context).size.height * 0.12,
+                              height: MediaQuery.of(context).size.height * 0.12,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  color: Colors.grey.withOpacity(0.2)),
+                              child: const Loading()),
+                          errorWidgetBuilder: (context, path, obj) =>
+                              SmallCardImageHolder(
+                            image: Image.asset(
+                              'assets/images/logo.png',
+                              width: MediaQuery.of(context).size.height * 0.12,
+                              height: MediaQuery.of(context).size.height * 0.12,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                         ),
-                      ),
-                      placeholderBuilder: (context, path) => Container(
-                          width: MediaQuery.of(context).size.height * 0.12,
-                          height: MediaQuery.of(context).size.height * 0.12,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                              color: Colors.grey.withOpacity(0.2)),
-                          child: const Loading()),
-                      errorWidgetBuilder: (context, path, obj) =>
-                          SmallCardImageHolder(
-                        image: Image.asset(
-                          'assets/images/logo.png',
-                          width: MediaQuery.of(context).size.height * 0.12,
-                          height: MediaQuery.of(context).size.height * 0.12,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
+                        if (isSelected == true)
+                          Container(
+                            width: MediaQuery.of(context).size.height * 0.12,
+                            height: MediaQuery.of(context).size.height * 0.12,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                // border: Border.all(color: Colors.white, width: 2),
+                                color: Colors.white.withOpacity(0.65)),
+                            child: Icon(
+                              EneftyIcons.tick_circle_bold,
+                              color: maincolor,
+                              size: 50,
+                            ),
+                          )
+                      ]),
                     ),
                     Expanded(
                       child: Padding(
@@ -86,20 +111,22 @@ class ProductCard extends StatelessWidget {
                             const SizedBox(
                               height: 5,
                             ),
-                            SizedBox(
-                              width: MediaQuery.of(context).size.height * 0.25,
-                              child: Text(
-                                description,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                softWrap: true,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                        color: Colors.grey, fontSize: 10),
+                            if (forGhost != true)
+                              SizedBox(
+                                width:
+                                    MediaQuery.of(context).size.height * 0.25,
+                                child: Text(
+                                  description,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  softWrap: true,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                          color: Colors.grey, fontSize: 10),
+                                ),
                               ),
-                            ),
                             const SizedBox(
                               height: 5,
                             ),

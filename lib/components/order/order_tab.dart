@@ -130,7 +130,7 @@ class OrderTab extends StatelessWidget {
               children: [
                 PaymentMethodSelection(
                   walletInsufficient:
-                      UserController.walletBallance.value < grandTotal,
+                      UserController.walletBalance.value < grandTotal,
                   onMethodSelected: (paymentMethod) {
                     homeController.selectedPaymentPlan.value = paymentMethod;
                   },

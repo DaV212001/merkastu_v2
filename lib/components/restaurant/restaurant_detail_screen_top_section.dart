@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:merkastu_v2/controllers/home_controller.dart';
 
 import '../../constants/constants.dart';
 import '../../widgets/animated_widgets/loading.dart';
@@ -12,14 +13,14 @@ class RestaurantDetailScreenTopSection extends StatelessWidget {
   final String name;
   final String location;
   final bool favorited;
-  const RestaurantDetailScreenTopSection({
+  RestaurantDetailScreenTopSection({
     super.key,
     required this.image,
     required this.name,
     required this.location,
     required this.favorited,
   });
-
+  final controller = Get.find<HomeController>(tag: 'home');
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -155,14 +156,20 @@ class RestaurantDetailScreenTopSection extends StatelessWidget {
               ),
               child: Center(
                   child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(
-                  favorited
-                      ? EneftyIcons.heart_bold
-                      : EneftyIcons.heart_outline,
-                  color: favorited ? maincolor : Colors.grey,
-                ),
-              )),
+                      padding: const EdgeInsets.all(8.0),
+                      child: Obx(
+                        () => !controller.listOfSelectedProductsInStore.isEmpty
+                            ? GestureDetector(
+                                onTap: controller.addSelectedProductsToCart,
+                                child: Icon(Icons.add_shopping_cart),
+                              )
+                            : Icon(
+                                favorited
+                                    ? EneftyIcons.heart_bold
+                                    : EneftyIcons.heart_outline,
+                                color: favorited ? maincolor : Colors.grey,
+                              ),
+                      ))),
             ),
           ),
         )

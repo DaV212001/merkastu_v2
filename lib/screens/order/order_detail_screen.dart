@@ -182,7 +182,58 @@ class OrderDetailScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 20),
+          Center(
+            child: Container(
+              width: MediaQuery.of(Get.context!).size.width * 0.43,
+              height: 20,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: maincolor),
+              ),
+              child: Center(
+                child: DropdownButton<PaymentMethod>(
+                  items: PaymentMethod.values
+                      .where((e) => e != PaymentMethod.none)
+                      .map((e) => DropdownMenuItem<PaymentMethod>(
+                          value: e, child: Text(e.name)))
+                      .toList(),
+                  onChanged: (paymentMethod) {
+                    controller.selectedPaymentMethod.value = paymentMethod!;
+                  },
+                  value: controller.selectedPaymentMethod.value ==
+                          PaymentMethod.none
+                      ? null
+                      : controller.selectedPaymentMethod.value,
+                  icon: Icon(
+                    EneftyIcons.arrow_circle_down_bold,
+                    size: 16,
+                    color: maincolor,
+                  ),
+                  underline: const SizedBox.shrink(),
+                  hint: const Text(
+                    'Change payment method   ',
+                    style: TextStyle(fontSize: 10),
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+
+                  // decoration: InputDecoration(
+                  //   hintText: 'Change payment method',
+                  //   icon: null,
+                  //   suffixIcon: null,
+                  //   suffix: null,
+                  //   hintStyle: const TextStyle(fontSize: 10),
+                  //   focusedBorder: OutlineInputBorder(
+                  //       borderRadius: BorderRadius.circular(10),
+                  //       borderSide: BorderSide(color: maincolor)),
+                  //   enabledBorder: OutlineInputBorder(
+                  //       borderRadius: BorderRadius.circular(10),
+                  //       borderSide: BorderSide(color: maincolor)),
+                  // ),
+                ),
+              ),
+            ),
+          ),
+          // const SizedBox(height: 20),
           Center(child: controller.selectedOrder.value.payment!.cover),
           const SizedBox(height: 20),
           Padding(

@@ -63,7 +63,7 @@ class WalletHistoryScreen extends StatelessWidget {
                                   width:
                                       MediaQuery.of(context).size.width * 0.4,
                                   child: AutoSizeText(
-                                    UserController.walletBallance
+                                    UserController.walletBalance
                                         .toStringAsFixed(2),
                                     maxLines: 1,
                                     minFontSize: 9,
