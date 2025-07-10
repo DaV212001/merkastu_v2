@@ -20,7 +20,7 @@ class RestaurantDetailScreenTopSection extends StatelessWidget {
     required this.location,
     required this.favorited,
   });
-  final controller = Get.find<HomeController>(tag: 'home');
+  final controller = Get.find<CartController>(tag: 'cart');
   @override
   Widget build(BuildContext context) {
     return Row(

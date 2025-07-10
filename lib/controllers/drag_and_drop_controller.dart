@@ -18,8 +18,8 @@ class DragDropController extends GetxController {
 
   // Add product to the cart
   void addToCart(Product product) {
-    final HomeController homeController = Get.find<HomeController>(tag: 'home');
-    homeController.addProductToCart(product);
+    final CartController cartController = Get.find<CartController>(tag: 'cart');
+    cartController.addProductToCart(product);
     stopDragging(); // Clear the dragged product
   }
 }

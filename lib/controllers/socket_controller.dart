@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
+import 'package:merkastu_v2/constants/constants.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 import 'auth_controller.dart';
@@ -9,13 +10,15 @@ class SocketController extends GetxController {
   final userData = UserController.user.value;
   late var socket = io
       .io(
-        'https://merkastu.endevour.org',
+        '$kApiBaseUrl/',
         io.OptionBuilder().setTransports(['websocket']).build(),
       )
       .obs;
 
   var isSocketConnected = false.obs;
-  Function(Object data)? eventHandler;
+  List<Function(Object data)?> eventHandlers = [];
+  Function(Object data)? onAcceptOrderError;
+  Function(Object data)? onCancelOrderError;
 
   @override
   void onInit() {
@@ -23,8 +26,11 @@ class SocketController extends GetxController {
     Logger().d('ID ${userData.id}');
     connectToSocket();
     socket.value.onConnect(_onConnect);
-    socket.value.on('${userData.id}', _onEvent);
+    socket.value.on('${userData.id}-orderAcceptedByDeliveryPerson', _onEvent);
     socket.value.on('all', _onEvent);
+    socket.value.on('${userData.id}-cancelOrderError', _onEvent);
+    socket.value.on('${userData.id}-orderRecievError', _onAcceptOrderError);
+    socket.value.on('${userData.id}-error', _onEvent);
     socket.value.onDisconnect(_onDisconnect);
   }
 
@@ -48,19 +54,45 @@ class SocketController extends GetxController {
     Logger().i('Socket connected');
   }
 
+  void _onCancelOrderError(data) {
+    Logger().i('Socket data $data');
+    try {
+      onCancelOrderError?.call(data);
+    } catch (e, stack) {
+      Logger().t(e, stackTrace: stack);
+    }
+  }
+
+  void _onAcceptOrderError(data) {
+    Logger().i('Socket data $data');
+    try {
+      onAcceptOrderError?.call(data);
+    } catch (e, stack) {
+      Logger().t(e, stackTrace: stack);
+    }
+  }
+
   void _onEvent(dynamic data) async {
     Logger().i('Socket data $data');
     try {
-      // Logger().d(data);
-
-      await eventHandler?.call(data);
+      for (var eventHandler in eventHandlers) {
+        await eventHandler?.call(data);
+      }
     } catch (e, stack) {
       Logger().t(e, stackTrace: stack);
     }
   }
 
   void setEventHandler(Function(dynamic data) handler) {
-    eventHandler = handler;
+    eventHandlers.add(handler);
+  }
+
+  void setCancelOrderErrorHandler(Function(dynamic data) handler) {
+    onCancelOrderError = handler;
+  }
+
+  void setAcceptOrderErrorHandler(Function(dynamic data) handler) {
+    onAcceptOrderError = handler;
   }
 
   void _onDisconnect(_) {}

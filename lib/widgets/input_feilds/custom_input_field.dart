@@ -8,6 +8,7 @@ class CustomInputField extends StatelessWidget {
   final String? initialValue;
   final String? label;
   final Color primaryColor;
+  final bool? enabeled;
   final String? Function(String?)? validator;
   final Function(dynamic val) onChanged;
   final TextInputType? keyboardType;
@@ -20,7 +21,8 @@ class CustomInputField extends StatelessWidget {
       this.validator,
       this.keyboardType,
       this.initialValue,
-      this.label});
+      this.label,
+      this.enabeled});
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +31,7 @@ class CustomInputField extends StatelessWidget {
       onChanged: onChanged,
       keyboardType: keyboardType,
       initialValue: initialValue,
+      enabled: enabeled ?? true,
       style: const TextStyle(fontSize: 12),
       decoration: InputDecoration(
         hintText: hintText,

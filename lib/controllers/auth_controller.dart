@@ -57,7 +57,7 @@ class SignUpController extends GetxController {
       "roomNumber": int.parse(room.value),
       "firstName": firstName.value,
       "lastName": lastName.value,
-      "password": int.parse(password.value)
+      "password": password.value
     };
     dio.Response response = dio.Response(requestOptions: dio.RequestOptions());
     Logger().d(data);
@@ -198,6 +198,7 @@ class LoginController extends GetxController {
         response = await DioConfig.dio()
             .post('/user/auth/sign-in', data: jsonEncode(body));
         Logger().d(response.data);
+
         if ((response.statusCode == 201 || response.statusCode == 200) &&
             response.data['status'] == true) {
           final data = response.data['data'];
@@ -271,10 +272,10 @@ class UserController extends GetxController
       // String reset = '\u001b[0m'; // Reset ANSI code
       // print('${blue} ${user.toString()} ${reset}');
       userTemp = user;
-      if (Get.isRegistered<HomeController>(tag: 'home')) {
-        Get.find<HomeController>(tag: 'home').block.value =
+      if (Get.isRegistered<CartController>(tag: 'cart')) {
+        Get.find<CartController>(tag: 'cart').block.value =
             (user.block ?? 0).toString();
-        Get.find<HomeController>(tag: 'home').room.value =
+        Get.find<CartController>(tag: 'cart').room.value =
             (user.room ?? 0).toString();
       }
       isLoggedIn.value = true;
@@ -355,12 +356,12 @@ class UserController extends GetxController
               'Authorization': ConfigPreference.getUserToken(),
             },
           ));
-      Logger().d(response.data);
+      // Logger().d(response.data);
       if (response.statusCode == 200 && response.data['status'] == true) {
         walletBalance.value =
             (response.data['data']['balance'] ?? 0).toDouble();
       } else {
-        Exception(response.data['message']);
+        throw Exception(response.data['message']);
       }
       Logger().d(response.data);
       loadingBalance.value = false;

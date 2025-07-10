@@ -58,9 +58,11 @@ class StoreListScreen extends StatelessWidget {
                       ),
                     )
                   : controller.storeLoadingErrorData.value.body != ''
-                      ? ErrorCard(
-                          errorData: controller.storeLoadingErrorData.value,
-                          refresh: controller.fetchStores,
+                      ? SingleChildScrollView(
+                          child: ErrorCard(
+                            errorData: controller.storeLoadingErrorData.value,
+                            refresh: controller.fetchStores,
+                          ),
                         )
                       : controller.filteredStoreList.isEmpty
                           ? ErrorCard(
@@ -134,6 +136,10 @@ class StoreListScreen extends StatelessWidget {
                                                         index]);
                                               }
                                             },
+                                            isAvailable: controller
+                                                    .filteredStoreList[index]
+                                                    .isAvailable ??
+                                                false,
                                           ).animateOnPageLoad(animationsMap[
                                               'containerOnPageLoadAnimation']!),
                                         ),

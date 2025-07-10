@@ -7,14 +7,16 @@ import '../../../controllers/app_info_controller.dart';
 import '../../../utils/api_call_status.dart';
 import '../../../widgets/cards/error_card.dart';
 
-class PrivacyPolicyScreen extends StatelessWidget {
-  PrivacyPolicyScreen({super.key});
+class RefundPolicyScreen extends StatelessWidget {
+  RefundPolicyScreen({super.key});
+
   final controller = Get.find<AppInfoController>(tag: 'appInfo');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Privacy Policy'),
+        title: const Text('Refund Policy'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -22,18 +24,18 @@ class PrivacyPolicyScreen extends StatelessWidget {
           child: Column(
             children: [
               Obx(
-                () => controller.gettingPrivacyPolicy.value ==
+                () => controller.gettingRefundPolicy.value ==
                         ApiCallStatus.loading
                     ? const Loading()
-                    : controller.gettingPrivacyPolicy.value ==
+                    : controller.gettingRefundPolicy.value ==
                             ApiCallStatus.error
                         ? Center(
                             child: ErrorCard(
-                              errorData: controller.errorGettingPrivacyPolicy,
-                              refresh: () => controller.fetchPrivacyPolicy(),
+                              errorData: controller.errorGettingRefundPolicy,
+                              refresh: () => controller.fetchRefundPolicy(),
                             ),
                           )
-                        : controller.appInfoPrivacyPolicy.value.isEmpty
+                        : controller.appInfoRefundPolicy.value.isEmpty
                             ? Center(
                                 child: ErrorCard(
                                   errorData: ErrorData(
@@ -41,11 +43,10 @@ class PrivacyPolicyScreen extends StatelessWidget {
                                       body:
                                           'No information found, please try later',
                                       image: 'assets/images/empty.svg'),
-                                  refresh: () =>
-                                      controller.fetchPrivacyPolicy(),
+                                  refresh: () => controller.fetchRefundPolicy(),
                                 ),
                               )
-                            : Text(controller.appInfoPrivacyPolicy.value),
+                            : Text(controller.appInfoRefundPolicy.value),
               )
             ],
           ),

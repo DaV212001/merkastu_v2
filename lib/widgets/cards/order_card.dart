@@ -50,7 +50,7 @@ class OrderCard extends StatelessWidget {
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      color: maincolor,
+                      color: orderStatus.color,
                       borderRadius: BorderRadius.circular(7),
                       boxShadow: [
                         BoxShadow(
@@ -86,7 +86,8 @@ class OrderCard extends StatelessWidget {
                   ),
                 ],
               ),
-              if (orderStatus != OrderStatus.inactive)
+              if (orderStatus != OrderStatus.inactive &&
+                  paymentMethod != PaymentMethod.none)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.end,

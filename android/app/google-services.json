@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1095373800658",
+    "project_id": "merkastu-customer",
+    "storage_bucket": "merkastu-customer.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1095373800658:android:24c09a5dd5a819c864190b",
+        "android_client_info": {
+          "package_name": "com.merkastu.customer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJWASpaxYWuH_Rxyf2swe4d3LmbzFTlXI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

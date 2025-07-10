@@ -1,7 +1,9 @@
 import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:merkastu_v2/constants/constants.dart';
+import 'package:get/get.dart';
 
+import '../../constants/constants.dart';
+import '../../controllers/home_controller.dart';
 import '../../utils/payment_methods.dart';
 
 class PaymentMethodSelection extends StatefulWidget {
@@ -32,6 +34,7 @@ class _PaymentMethodSelectionState extends State<PaymentMethodSelection> {
         widget.initialMethod; // Initialize with the provided method
   }
 
+  final CartController cartController = Get.find<CartController>(tag: 'cart');
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -42,7 +45,10 @@ class _PaymentMethodSelectionState extends State<PaymentMethodSelection> {
         return methodFilter;
       }).map((method) {
         bool isWalletMethod = method == PaymentMethod.wallet;
-        bool isWalletDisabled = isWalletMethod && widget.walletInsufficient;
+        bool hasNonDeliveryOnlyProduct =
+            cartController.hasNonDeliveryOnlyProduct.value;
+        bool isWalletDisabled = isWalletMethod &&
+            (widget.walletInsufficient || hasNonDeliveryOnlyProduct);
 
         return Padding(
           padding: const EdgeInsets.all(6.0),

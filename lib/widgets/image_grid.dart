@@ -105,9 +105,7 @@ class ImageGrid extends StatelessWidget {
                           ),
                           child: Center(
                             child: Text(
-                              '+${storeCount - 3} more ${{
-                                (storeCount - 3) > 1 ? 'stores' : 'store'
-                              }}',
+                              '+${storeCount - 3} more ${(storeCount - 3) > 1 ? 'stores' : 'store'}',
                               style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600),

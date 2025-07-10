@@ -1,29 +1,32 @@
 import 'package:get/get.dart';
-import 'package:merkastu_v2/screens/auth/log_in_screen.dart';
-import 'package:merkastu_v2/screens/auth/login_prompter.dart';
-import 'package:merkastu_v2/screens/auth/phone_verification_screen.dart';
-import 'package:merkastu_v2/screens/auth/sign_up_screen.dart';
-import 'package:merkastu_v2/screens/favorites/favorite_products_screen.dart';
-import 'package:merkastu_v2/screens/favorites/favorite_restaurants_screen.dart';
-import 'package:merkastu_v2/screens/favorites/favorites_screen.dart';
-import 'package:merkastu_v2/screens/home/store_detail_screen.dart';
-import 'package:merkastu_v2/screens/home/store_list_screen.dart';
-import 'package:merkastu_v2/screens/main_layout_screen.dart';
-import 'package:merkastu_v2/screens/order/check_out_screen.dart';
-import 'package:merkastu_v2/screens/order/order_detail_screen.dart';
-import 'package:merkastu_v2/screens/settings/password/forgot_password_screen.dart';
-import 'package:merkastu_v2/screens/settings/settings_screen.dart';
-import 'package:merkastu_v2/screens/settings/wallet/wallet_history_screen.dart';
-import 'package:merkastu_v2/utils/initial_navigation_middleware.dart';
+import 'package:merkastu_v2/screens/settings/app_documentation/cancellation_policy_screen.dart';
 
+import '../screens/auth/log_in_screen.dart';
+import '../screens/auth/login_prompter.dart';
+import '../screens/auth/phone_verification_screen.dart';
+import '../screens/auth/sign_up_screen.dart';
+import '../screens/favorites/favorite_products_screen.dart';
+import '../screens/favorites/favorite_restaurants_screen.dart';
+import '../screens/favorites/favorites_screen.dart';
+import '../screens/home/store_detail_screen.dart';
+import '../screens/home/store_list_screen.dart';
+import '../screens/main_layout_screen.dart';
 import '../screens/order/cart_screen.dart';
+import '../screens/order/check_out_screen.dart';
+import '../screens/order/order_detail_screen.dart';
 import '../screens/order/order_history_screen.dart';
 import '../screens/settings/app_documentation/about_us_screen.dart';
 import '../screens/settings/app_documentation/privacy_policy_screen.dart';
+import '../screens/settings/app_documentation/refund_policy_screen.dart';
+import '../screens/settings/app_documentation/shipping_policy_screen.dart';
 import '../screens/settings/app_documentation/terms_and_conditions_screen.dart';
 import '../screens/settings/password/change_password_screen.dart';
+import '../screens/settings/password/forgot_password_screen.dart';
 import '../screens/settings/profile/profile_screen.dart';
+import '../screens/settings/settings_screen.dart';
 import '../screens/settings/wallet/fill_wallet_screen.dart';
+import '../screens/settings/wallet/wallet_history_screen.dart';
+import '../utils/initial_navigation_middleware.dart';
 
 class Routes {
   static String get initialRoute => '/home';
@@ -49,6 +52,9 @@ class Routes {
   static String get settingsRoute => '/settings';
   static String get phoneVerifyRoute => '/phone_verify';
   static String get loginPromptRoute => '/login_prompt';
+  static String get refundRoute => '/refund';
+  static String get shippingRoute => '/shipping';
+  static String get cancelRoute => '/cancel';
 }
 
 class Pages {
@@ -119,6 +125,9 @@ class Pages {
       middlewares: [
         InitialNavigationMiddleware(),
       ],
+      // binding: BindingsBuilder(() {
+      //   Get.create<OrderDetailController>(() => OrderDetailController());
+      // }),
     ),
     GetPage(
       name: Routes.cartRoute,
@@ -128,15 +137,15 @@ class Pages {
     //settings
     GetPage(
       name: Routes.aboutRoute,
-      page: () => const AboutUsScreen(),
+      page: () => AboutUsScreen(),
     ),
     GetPage(
       name: Routes.privacyRoute,
-      page: () => const PrivacyPolicyScreen(),
+      page: () => PrivacyPolicyScreen(),
     ),
     GetPage(
       name: Routes.termsRoute,
-      page: () => const TermsAndConditionsScreen(),
+      page: () => TermsAndConditionsScreen(),
     ),
     GetPage(
       name: Routes.changePasswordRoute,
@@ -160,5 +169,10 @@ class Pages {
       name: Routes.settingsRoute,
       page: () => SettingsScreen(),
     ),
+
+    //////////////////////////////////
+    GetPage(name: Routes.refundRoute, page: () => RefundPolicyScreen()),
+    GetPage(name: Routes.shippingRoute, page: () => ShippingPolicyScreen()),
+    GetPage(name: Routes.cancelRoute, page: () => CancellationPolicyScreen()),
   ];
 }

@@ -48,7 +48,9 @@ class ProductCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     GestureDetector(
-                      onTap: onImageTap,
+                      onTap: () {
+                        onImageTap();
+                      },
                       child: Stack(alignment: Alignment.center, children: [
                         cachedNetworkImageWrapper(
                           imageUrl: image,
@@ -148,18 +150,19 @@ class ProductCard extends StatelessWidget {
                 ),
               ),
             ),
-            Positioned(
-                bottom: 10,
-                right: 10,
-                child: GestureDetector(
-                  onTap: onHeartTap,
-                  child: Icon(
-                    favorited
-                        ? EneftyIcons.heart_bold
-                        : EneftyIcons.heart_outline,
-                    color: maincolor,
-                  ),
-                )),
+            if (forGhost != true)
+              Positioned(
+                  bottom: 10,
+                  right: 10,
+                  child: GestureDetector(
+                    onTap: onHeartTap,
+                    child: Icon(
+                      favorited
+                          ? EneftyIcons.heart_bold
+                          : EneftyIcons.heart_outline,
+                      color: maincolor,
+                    ),
+                  )),
           ],
         ));
   }

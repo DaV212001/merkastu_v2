@@ -4,14 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:merkastu_v2/constants/pages.dart';
-import 'package:merkastu_v2/controllers/theme_mode_controller.dart';
-import 'package:merkastu_v2/models/wallet_transaction.dart';
+import 'package:merkastu_v2/models/withdrawal_request.dart';
+import 'package:merkastu_v2/screens/settings/wallet/withdrawal_request_screen.dart';
+import 'package:merkastu_v2/utils/payment_methods.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../constants/assets.dart';
 import '../../../constants/constants.dart';
+import '../../../constants/pages.dart';
 import '../../../controllers/auth_controller.dart';
+import '../../../controllers/theme_mode_controller.dart';
 import '../../../controllers/wallet_controller.dart';
+import '../../../models/wallet_transaction.dart';
 import '../../../utils/api_call_status.dart';
 import '../../../utils/error_data.dart';
 import '../../../widgets/animated_widgets/loading.dart';
@@ -26,7 +30,8 @@ class WalletHistoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Wallet history'),
+        title: const Text('Wallet history'),
+        actions: [],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -87,7 +92,26 @@ class WalletHistoryScreen extends StatelessWidget {
                               ),
                             )
                           ],
-                        )
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                                onPressed: () {
+                                  Get.to(WithdrawalRequestScreen());
+                                },
+                                child: const AutoSizeText(
+                                  'Withdraw',
+                                  minFontSize: 9,
+                                  maxFontSize: 12,
+                                  stepGranularity: 0.5,
+                                  maxLines: 1,
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 11),
+                                )),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -95,13 +119,20 @@ class WalletHistoryScreen extends StatelessWidget {
               ),
               TabBar(controller: controller.tabController, tabs: const [
                 Tab(
-                    child: Text(
-                  'Deposits',
-                )),
+                  child: Text(
+                    'Deposits',
+                  ),
+                ),
                 Tab(
-                    child: Text(
-                  'Withdrawals',
-                )),
+                  child: Text(
+                    'Requests',
+                  ),
+                ),
+                Tab(
+                  child: Text(
+                    'Withdrawals',
+                  ),
+                ),
               ]),
               Obx(() => controller.gettingWalletHistory.value ==
                       ApiCallStatus.loading
@@ -172,6 +203,98 @@ class WalletHistoryScreen extends StatelessWidget {
                                                 ),
                                               );
                                             }),
+                                      ),
+
+                                      /// Request
+
+                                      SingleChildScrollView(
+                                        child: Column(
+                                          children: [
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: ListView.builder(
+                                                  physics:
+                                                      const NeverScrollableScrollPhysics(),
+                                                  itemCount: controller
+                                                          .withdrawalRequests
+                                                          .isEmpty
+                                                      ? 1
+                                                      : controller
+                                                          .withdrawalRequests
+                                                          .length,
+                                                  shrinkWrap: true,
+                                                  itemBuilder:
+                                                      (context, index) {
+                                                    if (controller
+                                                        .withdrawalRequests
+                                                        .isEmpty) {
+                                                      return ErrorCard(
+                                                          errorData: ErrorData(
+                                                              title:
+                                                                  'No Requests',
+                                                              body:
+                                                                  'You haven\'t made any requests yet',
+                                                              image: Assets
+                                                                  .empty));
+                                                    }
+                                                    var requestId = controller
+                                                        .withdrawalRequests[
+                                                            index]
+                                                        .id
+                                                        .toString();
+                                                    var declineReason = controller
+                                                            .withdrawalRequests[
+                                                                index]
+                                                            .declineReason ??
+                                                        '';
+                                                    var receipt = controller
+                                                            .withdrawalRequests[
+                                                                index]
+                                                            .receipt ??
+                                                        '';
+                                                    var requestAmount =
+                                                        controller
+                                                            .withdrawalRequests[
+                                                                index]
+                                                            .amount
+                                                            .toString();
+                                                    var paymentMethod =
+                                                        controller
+                                                            .withdrawalRequests[
+                                                                index]
+                                                            .paymentMethod!;
+                                                    var paymentAccount =
+                                                        controller
+                                                            .withdrawalRequests[
+                                                                index]
+                                                            .paymentAccount!;
+                                                    var status = controller
+                                                        .withdrawalRequests[
+                                                            index]
+                                                        .status!;
+                                                    return Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              8.0),
+                                                      child: WithdrawalRequest(
+                                                        requestId: requestId,
+                                                        declineReason:
+                                                            declineReason,
+                                                        receipt: receipt,
+                                                        requestAmount:
+                                                            requestAmount,
+                                                        paymentMethod:
+                                                            paymentMethod,
+                                                        paymentAccount:
+                                                            paymentAccount,
+                                                        status: status,
+                                                      ),
+                                                    );
+                                                  }),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                       ListView.builder(
                                           itemCount: controller
@@ -327,6 +450,148 @@ class WalletTransactionCard extends StatelessWidget {
                       ),
                       Text(
                         transactionAmount,
+                        style: TextStyle(
+                            color: ThemeModeController.isLightTheme.value
+                                ? Colors.black
+                                : Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16),
+                      ),
+                    ],
+                  )),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class WithdrawalRequest extends StatelessWidget {
+  const WithdrawalRequest({
+    super.key,
+    required this.requestId,
+    required this.declineReason,
+    required this.receipt,
+    required this.requestAmount,
+    required this.paymentMethod,
+    required this.paymentAccount,
+    required this.status,
+  });
+
+  final String requestId;
+  final String declineReason;
+  final String receipt;
+  final String requestAmount;
+  final PaymentMethod paymentMethod;
+  final String paymentAccount;
+  final WalletWithdrawalStatus status;
+
+  void _launchReceiptUrl() async {
+    final Uri receiptUri = Uri.parse(receipt);
+    await launchUrl(
+      receiptUri,
+      mode: LaunchMode.externalApplication,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(8.0),
+          boxShadow: kCardShadow()),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Text(
+                        'ID: ',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.4,
+                        child: AutoSizeText(
+                          requestId,
+                          maxLines: 1,
+                          minFontSize: 12,
+                          maxFontSize: 16,
+                          stepGranularity: 0.5,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Clipboard.setData(ClipboardData(
+                            text: requestId,
+                          )).then((_) {
+                            Get.snackbar('Copied', 'Copied to clipboard',
+                                snackPosition: SnackPosition.BOTTOM);
+                          });
+                        },
+                        child: Icon(
+                          EneftyIcons.copy_outline,
+                          color: maincolor,
+                          size: 20,
+                        ),
+                      )
+                    ],
+                  ),
+                  if (receipt != '')
+                    GestureDetector(
+                        onTap: () => _launchReceiptUrl(), child: Text(receipt)),
+                  Row(
+                    children: [
+                      Text(paymentMethod.name),
+                      Text(': $paymentAccount'),
+                    ],
+                  ),
+                  if (declineReason != '') Text(declineReason),
+                ],
+              ),
+            ),
+            // const Expanded(
+            //   child: SizedBox(
+            //     width: double.infinity,
+            //   ),
+            // ),
+            Expanded(
+              child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        status.name,
+                        style: TextStyle(
+                          color: status == WalletWithdrawalStatus.PENDING
+                              ? Colors.orange
+                              : status == WalletWithdrawalStatus.DECLINED
+                                  ? Colors.red
+                                  : maincolor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Icon(
+                        EneftyIcons.wallet_2_bold,
+                        size: 16,
+                        color: maincolor,
+                      ),
+                      Text(
+                        requestAmount,
                         style: TextStyle(
                             color: ThemeModeController.isLightTheme.value
                                 ? Colors.black

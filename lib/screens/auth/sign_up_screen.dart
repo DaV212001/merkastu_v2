@@ -273,7 +273,7 @@ class _TabBarAndTabViewsState extends State<TabBarAndTabViews>
                           },
                           child: Text(
                             "Sign Up",
-                            style: TextStyle(color: secondarycolor),
+                            style: TextStyle(color: Colors.white),
                           ),
                         ),
                       )),
@@ -309,7 +309,7 @@ class _TabBarAndTabViewsState extends State<TabBarAndTabViews>
             },
             child: Text(
               'Previous',
-              style: TextStyle(color: secondarycolor),
+              style: TextStyle(color: Colors.white),
             ),
           ),
         if (index != 2)
@@ -324,7 +324,7 @@ class _TabBarAndTabViewsState extends State<TabBarAndTabViews>
             },
             child: Text(
               'Next',
-              style: TextStyle(color: secondarycolor),
+              style: TextStyle(color: Colors.white),
             ),
           ),
       ],

@@ -3,12 +3,14 @@ import 'package:merkastu_v2/utils/order_status.dart';
 import 'package:merkastu_v2/utils/payment_methods.dart';
 
 class StoreSmall {
+  final String? id;
   final String? storeName;
   final String? storeLogo;
   final String? coverImage;
   final int? productCount;
 
   StoreSmall({
+    this.id,
     this.storeName,
     this.storeLogo,
     this.coverImage,
@@ -18,9 +20,12 @@ class StoreSmall {
   // Factory constructor to parse from JSON
   factory StoreSmall.fromJson(Map<String, dynamic> json) {
     return StoreSmall(
+      id: json['store_id'],
       storeName: json['store_name'],
       storeLogo: json['store_logo'],
-      coverImage: kStoreImageBaseUrl + json['cover_image'],
+      coverImage: json.containsKey('cover_image') && json['cover_image'] != null
+          ? kStoreImageBaseUrl + json['cover_image']
+          : '',
       productCount: json['product_count'],
     );
   }
@@ -33,6 +38,45 @@ class StoreSmall {
       'cover_image': coverImage,
       'product_count': productCount,
     };
+  }
+}
+
+enum OrderType { delivery, takeaway, eatIn }
+
+extension OrderTypeExtension on OrderType {
+  String get name {
+    switch (this) {
+      case OrderType.delivery:
+        return 'DELIVERY';
+      case OrderType.takeaway:
+        return 'TAKEAWAY';
+      case OrderType.eatIn:
+        return 'EAT_IN';
+    }
+  }
+
+  String get nameDisplay {
+    switch (this) {
+      case OrderType.delivery:
+        return 'Delivery';
+      case OrderType.takeaway:
+        return 'Takeaway';
+      case OrderType.eatIn:
+        return 'Eat In';
+    }
+  }
+
+  static OrderType fromName(String name) {
+    switch (name) {
+      case 'DELIVERY' || 'delivery':
+        return OrderType.delivery;
+      case 'TAKEAWAY' || 'takeaway':
+        return OrderType.takeaway;
+      case 'EAT_IN' || 'eatIn' || 'eat_in':
+        return OrderType.eatIn;
+      default:
+        return OrderType.delivery;
+    }
   }
 }
 
@@ -50,8 +94,10 @@ class Order {
   final DateTime? createdAt;
   final DateTime? paidAt;
   final List<StoreSmall>? stores;
+  final OrderType? orderType;
 
   Order({
+    this.orderType,
     this.deliveryPerson,
     this.id,
     this.totalOrders,
@@ -74,14 +120,31 @@ class Order {
         storesList.map((store) => StoreSmall.fromJson(store)).toList();
 
     return Order(
+      orderType: json.containsKey('order_type')
+          ? OrderTypeExtension.fromName(json['order_type'])
+          : null,
       id: json['id'],
       totalOrders: json['total_orders'],
       orderPrice: json['order_price'].toDouble(),
       deliveryFee: json['delivery_fee'].toDouble(),
-      deliveryPerson: json['delivery_person'],
+      deliveryPerson:
+          json.containsKey('delivery_person') && json['delivery_person'] != null
+              ? DeliveryPerson.fromJson(json['delivery_person'])
+              : DeliveryPerson(),
       totalPrice: json['total_price'].toDouble(),
-      payment: PaymentMethodExtension.fromName(json['payment_method']),
-      orderStatus: OrderStatusExtension.fromName(json['order_status']),
+      payment: json.containsKey('payment_method')
+          ? PaymentMethodExtension.fromName(json['payment_method'])
+          : PaymentMethod.none,
+      orderStatus: json.containsKey('paid_at')
+          ? json['paid_at'] == null
+              ? OrderStatus.inactive
+              : OrderStatusExtension.fromName(
+                  json.containsKey('preparation_status')
+                      ? json['preparation_status']
+                      : json['delivery_status'])
+          : OrderStatusExtension.fromName(json.containsKey('preparation_status')
+              ? json['preparation_status']
+              : json['delivery_status']),
       deliveryBlock: json['delivery_block'] is int
           ? json['delivery_block'].toString()
           : json['delivery_block'],
@@ -111,20 +174,28 @@ class Order {
       'stores': stores?.map((store) => store.toJson()).toList(),
     };
   }
+
+  bool isEqual(Order order) {
+    return id == order.id &&
+        payment == order.payment &&
+        orderStatus == order.orderStatus;
+  }
 }
 
 class DeliveryPerson {
   final String? name;
   final String? phone;
   final String? image;
+  final String? gender;
 
-  DeliveryPerson({this.name, this.phone, this.image});
+  DeliveryPerson({this.gender, this.name, this.phone, this.image});
 
   factory DeliveryPerson.fromJson(Map<String, dynamic> json) {
     return DeliveryPerson(
-      name: json['name'],
-      phone: json['phone'],
-      image: json['image'],
+      name: json['first_name'] + ' ' + json['father_name'],
+      phone: json['phone_number'],
+      image: kDeliveryPersonProfileImageBaseUrl + json['profile_image'],
+      gender: json['gender'],
     );
   }
 }

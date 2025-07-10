@@ -9,12 +9,14 @@ class PriceSummary extends StatelessWidget {
     required this.deliveryCharge,
     required this.serviceCharge,
     required this.grandTotal,
+    this.serviceChargeInfo,
   });
 
   final double subTotalPrice;
   final double deliveryCharge;
   final double serviceCharge;
   final double grandTotal;
+  final String? serviceChargeInfo;
 
   @override
   Widget build(BuildContext context) {
@@ -60,8 +62,9 @@ class PriceSummary extends StatelessWidget {
                         builder: (BuildContext context) {
                           return AlertDialog(
                             title: const Text("Service Charge Info"),
-                            content: const Text(
-                              "The service charge is 15% of the subtotal + delivery charges.",
+                            content: Text(
+                              serviceChargeInfo ??
+                                  "The service charge is 5% of the subtotal + delivery charges.",
                             ),
                             actions: [
                               TextButton(

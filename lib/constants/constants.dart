@@ -5,7 +5,7 @@ import 'package:retry/retry.dart';
 
 import '../controllers/theme_mode_controller.dart';
 
-String kApiBaseUrl = 'https://merkastu.endevour.org';
+String kApiBaseUrl = 'https://api.merkastu.com';
 String kStoreImageBaseUrl = '$kApiBaseUrl/public/store-images/';
 String kProductImagebaseUrl = '$kApiBaseUrl/public/product-images/';
 String kDeliveryPersonProfileImageBaseUrl =

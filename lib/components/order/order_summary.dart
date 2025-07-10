@@ -1,28 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:merkastu_v2/constants/constants.dart';
+import 'package:merkastu_v2/controllers/home_controller.dart';
 import 'package:merkastu_v2/widgets/cached_image_widget_wrapper.dart';
 
+import '../../models/order.dart';
 import '../../models/product.dart';
 import '../../models/store.dart';
 import '../../widgets/animated_widgets/loading.dart';
 import '../../widgets/cards/product_check_out_card.dart';
 
 class OrderSummary extends StatelessWidget {
-  const OrderSummary({
+  OrderSummary({
     super.key,
     required this.groupedProducts,
-    required this.storeList,
     required this.calculateStoreDeliveryFee,
     required this.storeNameById,
     required this.calculateTotalQuantityOfProductsFromStore,
   });
 
   final Map<String, List<Product>> groupedProducts;
-  final List<Store> storeList;
   final String? Function(String storeId) storeNameById;
   final String Function(String storeId) calculateStoreDeliveryFee;
   final int Function(String storeId) calculateTotalQuantityOfProductsFromStore;
-
+  final CartController cartController = Get.find<CartController>(tag: 'cart');
   @override
   Widget build(BuildContext context) {
     return Flexible(
@@ -35,7 +36,9 @@ class OrderSummary extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           itemBuilder: (context, storeIndex) {
             String storeId = groupedProducts.keys.elementAt(storeIndex);
-            Store store = storeList.firstWhere((store) => store.id == storeId);
+            Store store = Get.find<HomeController>(tag: 'home')
+                .storeList
+                .firstWhere((store) => store.id == storeId);
             List<Product> storeProducts = groupedProducts[storeId]!;
             double storeTotalPrice = storeProducts.fold(
                 0, (sum, product) => sum + num.parse(product.totalPrice()));
@@ -60,8 +63,8 @@ class OrderSummary extends StatelessWidget {
                     imageBuilder: (context, imageProvider) => Container(
                       width: 50,
                       height: 50,
-                      decoration: const BoxDecoration(
-                        // color: maincolor,
+                      decoration: BoxDecoration(
+                        color: maincolor.withOpacity(0.5),
                         shape: BoxShape.circle,
                       ),
                       child: ClipRRect(
@@ -89,8 +92,8 @@ class OrderSummary extends StatelessWidget {
                     errorWidgetBuilder: (context, path, object) => Container(
                       width: 50,
                       height: 50,
-                      decoration: const BoxDecoration(
-                        // color: maincolor,
+                      decoration: BoxDecoration(
+                        color: maincolor,
                         shape: BoxShape.circle,
                       ),
                       child: ClipRRect(
@@ -113,7 +116,7 @@ class OrderSummary extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Store total: ${(storeTotalPrice + double.parse(calculateStoreDeliveryFee(storeId))).toStringAsFixed(2)} Birr",
+                        "Store total: ${cartController.orderType.value == OrderType.delivery ? ((storeTotalPrice + double.parse(calculateStoreDeliveryFee(storeId))).toStringAsFixed(2)) : storeTotalPrice} Birr",
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
@@ -134,56 +137,59 @@ class OrderSummary extends StatelessWidget {
                         },
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: Text(
-                          'Delivery fee for this store: ${store.deliveryFee} Birr'),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: Row(
-                        children: [
-                          Text(
-                              'Delivery charge: ${calculateStoreDeliveryFee(storeId)} Birr'),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 4.0),
-                            child: GestureDetector(
-                              onTap: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    var numberOfProductsFromStoreInCart =
-                                        calculateTotalQuantityOfProductsFromStore(
-                                            storeId);
-                                    var numberOfBatches =
-                                        (numberOfProductsFromStoreInCart / 3)
-                                            .ceil();
-                                    return AlertDialog(
-                                      title: const Text("Delivery Charge Info"),
-                                      content: Text(
-                                        "The delivery fee is charged for every batch of 3 products in your cart. In this case, ${store.deliveryFee} Birr per batch from this store. You have a total of $numberOfProductsFromStoreInCart ${numberOfProductsFromStoreInCart > 1 ? 'products' : 'product'} from ${store.name} in your cart, which amounts to $numberOfBatches ${numberOfBatches > 1 ? 'batches' : 'batch'}, and thus you are charged with ${calculateStoreDeliveryFee(storeId)} Birr ",
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          child: const Text("OK"),
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
+                    if (cartController.orderType.value == OrderType.delivery)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Text(
+                            'Delivery fee for this store: ${store.deliveryFee} Birr'),
+                      ),
+                    if (cartController.orderType.value == OrderType.delivery)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Row(
+                          children: [
+                            Text(
+                                'Delivery charge: ${calculateStoreDeliveryFee(storeId)} Birr'),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 4.0),
+                              child: GestureDetector(
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      var numberOfProductsFromStoreInCart =
+                                          calculateTotalQuantityOfProductsFromStore(
+                                              storeId);
+                                      var numberOfBatches =
+                                          (numberOfProductsFromStoreInCart / 3)
+                                              .ceil();
+                                      return AlertDialog(
+                                        title:
+                                            const Text("Delivery Charge Info"),
+                                        content: Text(
+                                          "The delivery fee is charged for every batch of 3 products in your cart. In this case, ${store.deliveryFee} Birr per batch from this store. You have a total of $numberOfProductsFromStoreInCart ${numberOfProductsFromStoreInCart > 1 ? 'products' : 'product'} from ${store.name} in your cart, which amounts to $numberOfBatches ${numberOfBatches > 1 ? 'batches' : 'batch'}, and thus you are charged with ${calculateStoreDeliveryFee(storeId)} Birr ",
                                         ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              },
-                              child: Icon(
-                                Icons.info_outline,
-                                color: maincolor,
+                                        actions: [
+                                          TextButton(
+                                            child: const Text("OK"),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
+                                child: Icon(
+                                  Icons.info_outline,
+                                  color: maincolor,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),

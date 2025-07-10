@@ -13,10 +13,14 @@ class Store {
   final bool? insideAastu;
   final String? ownerId;
   final int? deliveryFee;
+  final bool? isAvailable;
+  final bool? deliveryOnly;
   bool favorited = false;
 
   Store({
+    this.deliveryOnly,
     this.deliveryFee,
+    this.isAvailable,
     this.id,
     this.name,
     this.location,
@@ -30,8 +34,10 @@ class Store {
     this.ownerId,
   });
 
-  Store.fromJson(Map<String, dynamic> json)
-      : id = json['id'],
+  Store.fromJson(
+    Map<String, dynamic> json,
+  )   : id = json['id'],
+        isAvailable = json['status'] == 'OPEN',
         name = json['name'],
         location = json['location'],
         latitude = json['latitude'],
@@ -42,11 +48,13 @@ class Store {
         deliveryTime = json['estimated_delivery_time'],
         insideAastu = json['inside_aastu'],
         deliveryFee = json['delivery_fee'],
-        ownerId = json['owner_id'];
+        ownerId = json['owner_id'],
+        deliveryOnly = json['delivery_only'];
 
-  Store.fromOrderDetailJson(
-    Map<String, dynamic> json,
-  )   : id = json['store_id'],
+  Store.fromOrderDetailJson(Map<String, dynamic> json)
+      : id = json['store_id'],
+        isAvailable =
+            json.containsKey('status') ? json['status'] == 'OPEN' : false,
         name = json['store_name'],
         location = '',
         latitude = json['latitude'],
@@ -57,5 +65,6 @@ class Store {
         ownerId = '',
         deliveryTime = json['estimated_delivery_time'],
         insideAastu = false,
-        deliveryFee = json['delivery_fee'];
+        deliveryFee = json['delivery_fee'],
+        deliveryOnly = json['delivery_only'];
 }

@@ -3,15 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:merkastu_v2/constants/assets.dart';
-import 'package:merkastu_v2/constants/pages.dart';
 import 'package:merkastu_v2/controllers/main_layout_controller.dart';
 import 'package:merkastu_v2/controllers/order_controller.dart';
+import 'package:merkastu_v2/controllers/order_detail_controller.dart';
 import 'package:merkastu_v2/utils/api_call_status.dart';
 import 'package:merkastu_v2/utils/error_data.dart';
 import 'package:merkastu_v2/widgets/shimmers/shimmering_order_card.dart';
 
+import '../../constants/pages.dart';
 import '../../utils/animations.dart';
 import '../../widgets/cards/error_card.dart';
 import '../../widgets/cards/order_card.dart';
@@ -89,104 +91,133 @@ class OrderHistoryTab extends StatelessWidget {
   };
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => orderController.fetchingHistoryOrders.value == ApiCallStatus.loading
-          ? ListView.builder(
-              itemCount: 10,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemBuilder: (context, index) {
-                return const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: ShimmeringOrderCard(),
-                );
-              })
-          : orderController.fetchingHistoryOrders.value == ApiCallStatus.error
-              ? Align(
-                  alignment: Alignment.center,
-                  child: Center(
-                    child: ErrorCard(
-                      errorData:
-                          orderController.errorFetchingHistoryOrders.value,
-                      refresh: orderController.fetchHistoryOrders,
-                    ),
-                  ),
-                )
-              : orderController.groupedHistoryOrders.isEmpty
-                  ? Center(
-                      child: ErrorCard(
-                        errorData: ErrorData(
-                          title: 'No Order History',
-                          body: '',
-                          image: Assets.empty,
-                          buttonText: 'Refresh',
+    return RefreshIndicator(
+      onRefresh: () => orderController.fetchHistoryOrders(),
+      child: SingleChildScrollView(
+        child: Obx(
+          () => orderController.fetchingHistoryOrders.value ==
+                  ApiCallStatus.loading
+              ? ListView.builder(
+                  itemCount: 10,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    return const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: ShimmeringOrderCard(),
+                    );
+                  })
+              : orderController.fetchingHistoryOrders.value ==
+                      ApiCallStatus.error
+                  ? Align(
+                      alignment: Alignment.center,
+                      child: Center(
+                        child: ErrorCard(
+                          errorData:
+                              orderController.errorFetchingHistoryOrders.value,
+                          refresh: orderController.fetchHistoryOrders,
                         ),
-                        refresh: orderController.fetchHistoryOrders,
                       ),
                     )
-                  : ListView.builder(
-                      itemCount:
-                          orderController.groupedHistoryOrders.keys.length,
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemBuilder: (context, index) {
-                        var keys = orderController.groupedHistoryOrders.keys;
-                        var currentKey = keys.toList()[index];
-                        var currentListOfOrders =
-                            orderController.groupedHistoryOrders[currentKey];
-                        return Column(
-                          children: [
-                            Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                  : orderController.groupedHistoryOrders.isEmpty
+                      ? Center(
+                          child: ErrorCard(
+                            errorData: ErrorData(
+                              title: 'No Order History',
+                              body: '',
+                              image: Assets.empty,
+                              buttonText: 'Refresh',
+                            ),
+                            refresh: orderController.fetchHistoryOrders,
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount:
+                              orderController.groupedHistoryOrders.keys.length,
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemBuilder: (context, index) {
+                            var keys =
+                                orderController.groupedHistoryOrders.keys;
+                            var currentKey = keys.toList()[index];
+                            var currentListOfOrders = orderController
+                                .groupedHistoryOrders[currentKey];
+                            return Column(
                               children: [
-                                // Padding(
-                                //   padding: const EdgeInsets.all(8.0),
-                                //   child: Text(
-                                //     DateFormat('yMMMd')
-                                //         .format(currentKey),
-                                //     style: const TextStyle(
-                                //         color: Colors.black54,
-                                //         fontWeight: FontWeight.bold,
-                                //         fontSize: 16),
-                                //   ),
-                                // ),
-                                Flexible(
-                                  fit: FlexFit.loose,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 0.0),
-                                    child: ListView.builder(
-                                        shrinkWrap: true,
-                                        itemCount: currentListOfOrders?.length,
-                                        physics:
-                                            const NeverScrollableScrollPhysics(),
-                                        itemBuilder: (context, index) {
-                                          return OrderCard(
-                                            stores: currentListOfOrders![index]
-                                                .stores!,
-                                            orderStatus:
-                                                currentListOfOrders[index]
-                                                    .orderStatus!,
-                                            totalPrice:
-                                                currentListOfOrders[index]
-                                                    .totalPrice!
-                                                    .toStringAsFixed(2),
-                                            paymentMethod:
-                                                currentListOfOrders[index]
-                                                    .payment!,
-                                            orderedOn:
-                                                currentListOfOrders[index]
-                                                    .createdAt!,
-                                          ).animateOnPageLoad(animationsMap[
-                                              'containerOnPageLoadAnimation']!);
-                                        }),
-                                  ),
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Padding(
+                                    //   padding: const EdgeInsets.all(8.0),
+                                    //   child: Text(
+                                    //     DateFormat('yMMMd')
+                                    //         .format(currentKey),
+                                    //     style: const TextStyle(
+                                    //         color: Colors.black54,
+                                    //         fontWeight: FontWeight.bold,
+                                    //         fontSize: 16),
+                                    //   ),
+                                    // ),
+                                    Flexible(
+                                      fit: FlexFit.loose,
+                                      child: Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 0.0),
+                                        child: ListView.builder(
+                                            shrinkWrap: true,
+                                            itemCount:
+                                                currentListOfOrders?.length,
+                                            physics:
+                                                const NeverScrollableScrollPhysics(),
+                                            itemBuilder: (context, index) {
+                                              return GestureDetector(
+                                                onTap: () {
+                                                  Get.toNamed(
+                                                      Routes.orderDetailRoute,
+                                                      arguments:
+                                                          currentListOfOrders[
+                                                              index]);
+
+                                                  if (Get.isRegistered<
+                                                      OrderDetailController>()) {
+                                                    final orderDetailController =
+                                                        Get.find<
+                                                            OrderDetailController>();
+                                                    orderDetailController
+                                                        .customInit();
+                                                  }
+                                                },
+                                                child: OrderCard(
+                                                  stores: currentListOfOrders![
+                                                          index]
+                                                      .stores!,
+                                                  orderStatus:
+                                                      currentListOfOrders[index]
+                                                          .orderStatus!,
+                                                  totalPrice:
+                                                      currentListOfOrders[index]
+                                                          .totalPrice!
+                                                          .toStringAsFixed(2),
+                                                  paymentMethod:
+                                                      currentListOfOrders[index]
+                                                          .payment!,
+                                                  orderedOn:
+                                                      currentListOfOrders[index]
+                                                          .createdAt!,
+                                                ).animateOnPageLoad(animationsMap[
+                                                    'containerOnPageLoadAnimation']!),
+                                              );
+                                            }),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
-                            ),
-                          ],
-                        );
-                      }),
+                            );
+                          }),
+        ),
+      ),
     );
   }
 }
@@ -270,93 +301,119 @@ class ActiveOrdersTab extends StatelessWidget {
                                 ),
                               ),
                             )
-                          : ListView.builder(
-                              itemCount: orderController
-                                  .groupedActiveOrders.keys.length,
-                              physics: const NeverScrollableScrollPhysics(),
-                              shrinkWrap: true,
-                              itemBuilder: (context, index) {
-                                var keys =
-                                    orderController.groupedActiveOrders.keys;
-                                var currentKey = keys.toList()[index];
-                                var currentListOfOrders = orderController
-                                    .groupedActiveOrders[currentKey];
-                                return Column(
-                                  children: [
-                                    Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                          : RefreshIndicator(
+                              onRefresh: () =>
+                                  orderController.fetchActiveOrders(),
+                              child: ListView.builder(
+                                  itemCount: orderController
+                                      .groupedActiveOrders.keys.length,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  shrinkWrap: true,
+                                  itemBuilder: (context, index) {
+                                    var keys = orderController
+                                        .groupedActiveOrders.keys;
+                                    var currentKey = keys.toList()[index];
+                                    var currentListOfOrders = orderController
+                                        .groupedActiveOrders[currentKey];
+                                    return Column(
                                       children: [
-                                        // Padding(
-                                        //   padding: const EdgeInsets.all(8.0),
-                                        //   child: Text(
-                                        //     DateFormat('yMMMd')
-                                        //         .format(currentKey),
-                                        //     style: const TextStyle(
-                                        //         color: Colors.black54,
-                                        //         fontWeight: FontWeight.bold,
-                                        //         fontSize: 16),
-                                        //   ),
-                                        // ),
-                                        Flexible(
-                                          fit: FlexFit.loose,
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(
-                                                left: 0.0),
-                                            child: ListView.builder(
-                                                shrinkWrap: true,
-                                                itemCount:
-                                                    currentListOfOrders?.length,
-                                                physics:
-                                                    const NeverScrollableScrollPhysics(),
-                                                itemBuilder: (context, index) {
-                                                  return GestureDetector(
-                                                    onTap: () {
-                                                      orderController
-                                                              .selectedOrder
-                                                              .value =
-                                                          currentListOfOrders[
-                                                              index];
-                                                      orderController
-                                                          .fetchOrderDetail();
-                                                      Get.toNamed(Routes
-                                                          .orderDetailRoute);
-                                                    },
-                                                    child: OrderCard(
-                                                      stores:
-                                                          currentListOfOrders![
-                                                                  index]
-                                                              .stores!,
-                                                      orderStatus:
-                                                          currentListOfOrders[
-                                                                  index]
-                                                              .orderStatus!,
-                                                      totalPrice:
-                                                          currentListOfOrders[
-                                                                  index]
-                                                              .totalPrice!
-                                                              .toStringAsFixed(
-                                                                  2),
-                                                      paymentMethod:
-                                                          currentListOfOrders[
-                                                                  index]
-                                                              .payment!,
-                                                      orderedOn:
-                                                          currentListOfOrders[
-                                                                  index]
-                                                              .createdAt!,
-                                                    ),
-                                                  ).animateOnPageLoad(animationsMap[
-                                                      'containerOnPageLoadAnimation']!);
-                                                }),
-                                          ),
+                                        Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Text(
+                                                DateFormat('yMMMd')
+                                                    .format(currentKey),
+                                                style: const TextStyle(
+                                                    color: Colors.black54,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16),
+                                              ),
+                                            ),
+                                            Flexible(
+                                              fit: FlexFit.loose,
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(
+                                                    left: 0.0),
+                                                child: ListView.builder(
+                                                    shrinkWrap: true,
+                                                    itemCount:
+                                                        currentListOfOrders
+                                                            ?.length,
+                                                    physics:
+                                                        const NeverScrollableScrollPhysics(),
+                                                    itemBuilder:
+                                                        (context, index) {
+                                                      return GestureDetector(
+                                                        onTap: () {
+                                                          // orderController
+                                                          //         .selectedOrder
+                                                          //         .value =
+                                                          //     currentListOfOrders[
+                                                          //         index];
+                                                          // orderController
+                                                          //     .fetchOrderDetail();
+                                                          // Get.create(() =>
+                                                          //     OrderDetailController(
+                                                          //         order:
+                                                          //             currentListOfOrders![
+                                                          //                 index]));
+
+                                                          Get.toNamed(
+                                                              Routes
+                                                                  .orderDetailRoute,
+                                                              arguments:
+                                                                  currentListOfOrders?[
+                                                                      index]);
+
+                                                          if (Get.isRegistered<
+                                                              OrderDetailController>()) {
+                                                            final orderDetailController =
+                                                                Get.find<
+                                                                    OrderDetailController>();
+                                                            orderDetailController
+                                                                .customInit();
+                                                          }
+                                                        },
+                                                        child:
+                                                            Obx(() => OrderCard(
+                                                                  stores: currentListOfOrders![
+                                                                          index]
+                                                                      .stores!,
+                                                                  orderStatus: orderController
+                                                                      .groupedActiveOrders[
+                                                                          currentKey]![
+                                                                          index]
+                                                                      .orderStatus!,
+                                                                  totalPrice: currentListOfOrders[
+                                                                          index]
+                                                                      .totalPrice!
+                                                                      .toStringAsFixed(
+                                                                          2),
+                                                                  paymentMethod:
+                                                                      currentListOfOrders[
+                                                                              index]
+                                                                          .payment!,
+                                                                  orderedOn: currentListOfOrders[
+                                                                          index]
+                                                                      .createdAt!,
+                                                                )),
+                                                      ).animateOnPageLoad(
+                                                          animationsMap[
+                                                              'containerOnPageLoadAnimation']!);
+                                                    }),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
-                                    ),
-                                  ],
-                                );
-                              }),
+                                    );
+                                  }),
+                            ),
             ),
             SizedBox(
               height: 70.h,

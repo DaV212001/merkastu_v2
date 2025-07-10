@@ -9,6 +9,7 @@ import 'package:ionicons/ionicons.dart';
 import 'package:merkastu_v2/config/storage_config.dart';
 import 'package:merkastu_v2/constants/constants.dart';
 import 'package:merkastu_v2/constants/pages.dart';
+import 'package:merkastu_v2/controllers/app_info_controller.dart';
 import 'package:merkastu_v2/controllers/auth_controller.dart';
 import 'package:merkastu_v2/controllers/theme_mode_controller.dart';
 import 'package:merkastu_v2/widgets/cards/profile_list_card.dart';
@@ -18,68 +19,93 @@ import '../../models/user.dart';
 
 class SettingsScreen extends StatelessWidget {
   SettingsScreen({super.key});
-
+  var control = Get.put(AppInfoController(), tag: 'appInfo');
   final List<Map<String, dynamic>> routesList = [
-    {
-      'name': 'Profile',
-      'icon': EneftyIcons.profile_circle_bold,
-      'onTap': () => Get.toNamed(Routes.profileRoute),
-      'isFirstTile': true,
-      'isLastTile': false,
-    },
+    // {
+    //   'name': 'Profile',
+    //   'icon': EneftyIcons.profile_circle_bold,
+    //   'onTap': () => Get.toNamed(Routes.profileRoute),
+    //   'isFirstTile': true,
+    //   'isLastTile': false,
+    // },
     {
       'name': 'My Wallet',
       'icon': EneftyIcons.wallet_2_bold,
       'onTap': () => Get.toNamed(Routes.walletHistoryRoute),
-      'isFirstTile': false,
-      'isLastTile': true,
-    },
-    {
-      'name': 'Help and Support',
-      'icon': Ionicons.help_circle,
-      'onTap': () {},
       'isFirstTile': true,
       'isLastTile': false,
     },
+    // {
+    //   'name': 'Help and Support',
+    //   'icon': Ionicons.help_circle,
+    //   'onTap': () {},
+    //   'isFirstTile': true,
+    //   'isLastTile': false,
+    // },
     {
       'name': 'About Us',
       'icon': EneftyIcons.info_circle_bold,
-      'onTap': () => Get.toNamed(Routes.aboutRoute),
+      'onTap': () {
+        var control = Get.find<AppInfoController>(tag: 'appInfo');
+        control.fetchAbout();
+        Get.toNamed(Routes.aboutRoute);
+      },
       'isFirstTile': false,
       'isLastTile': true,
     },
     {
       'name': 'Terms and Conditions',
       'icon': Ionicons.document_text,
-      'onTap': () => Get.toNamed(Routes.termsRoute),
+      'onTap': () {
+        var control = Get.find<AppInfoController>(tag: 'appInfo');
+
+        control.fetchTermsAndConditions();
+        Get.toNamed(Routes.termsRoute);
+      },
       'isFirstTile': true,
       'isLastTile': false,
     },
     {
       'name': 'Privacy Policy',
       'icon': Ionicons.lock_closed,
-      'onTap': () => Get.toNamed(Routes.privacyRoute),
+      'onTap': () {
+        var control = Get.find<AppInfoController>(tag: 'appInfo');
+        control.fetchPrivacyPolicy();
+        Get.toNamed(Routes.privacyRoute);
+      },
       'isFirstTile': false,
       'isLastTile': false,
     },
     {
       'name': 'Refund Policy',
       'icon': EneftyIcons.money_change_bold,
-      'onTap': () {},
+      'onTap': () {
+        var control = Get.find<AppInfoController>(tag: 'appInfo');
+        control.fetchRefundPolicy();
+        Get.toNamed(Routes.refundRoute);
+      },
       'isFirstTile': false,
       'isLastTile': false,
     },
     {
       'name': 'Cancellation Policy',
       'icon': EneftyIcons.stop_bold,
-      'onTap': () {},
+      'onTap': () {
+        var control = Get.find<AppInfoController>(tag: 'appInfo');
+        control.fetchCancellationPolicy();
+        Get.toNamed(Routes.cancelRoute);
+      },
       'isFirstTile': false,
       'isLastTile': false,
     },
     {
       'name': 'Shipping Policy',
       'icon': EneftyIcons.car_bold,
-      'onTap': () {},
+      'onTap': () {
+        var control = Get.find<AppInfoController>(tag: 'appInfo');
+        control.fetchShippingPolicy();
+        Get.toNamed(Routes.shippingRoute);
+      },
       'isFirstTile': false,
       'isLastTile': true,
     }
@@ -234,8 +260,8 @@ class SettingsScreen extends StatelessWidget {
                 )),
             Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-              ),
+                  // color: Theme.of(context).cardColor,
+                  ),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(

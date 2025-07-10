@@ -20,6 +20,19 @@ extension PaymentMethodExtension on PaymentMethod {
     }
   }
 
+  String get sampleLink {
+    switch (this) {
+      case PaymentMethod.none:
+        return "";
+      case PaymentMethod.cbe:
+        return "https://apps.cbe.com.et:100/?id=FT24309AYKPK99723312";
+      case PaymentMethod.teleBirr:
+        return "https://transactioninfo.ethiotelecom.et/receipt/BKCOD2D9E";
+      case PaymentMethod.wallet:
+        return "";
+    }
+  }
+
   Widget get icon {
     switch (this) {
       case PaymentMethod.none:

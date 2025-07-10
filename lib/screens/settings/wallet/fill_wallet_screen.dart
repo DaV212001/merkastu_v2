@@ -1,16 +1,17 @@
 import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:merkastu_v2/components/order/payment_method_selection.dart';
-import 'package:merkastu_v2/controllers/auth_controller.dart';
-import 'package:merkastu_v2/widgets/input_feilds/custom_input_field.dart';
 
+import '../../../components/order/payment_method_selection.dart';
 import '../../../constants/assets.dart';
 import '../../../constants/constants.dart';
+import '../../../controllers/auth_controller.dart';
 import '../../../utils/error_data.dart';
 import '../../../utils/payment_methods.dart';
 import '../../../widgets/animated_widgets/loading_animated_button.dart';
 import '../../../widgets/cards/error_card.dart';
+import '../../../widgets/input_feilds/custom_input_field.dart';
 
 class FillWalletScreen extends StatelessWidget {
   FillWalletScreen({super.key});
@@ -21,7 +22,7 @@ class FillWalletScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Fill wallet'),
+        title: const Text('Fill wallet'),
       ),
       body: Column(
         children: [
@@ -186,12 +187,44 @@ class FillWalletScreen extends StatelessWidget {
                                             style: TextStyle(
                                                 fontWeight: FontWeight.w600),
                                           ),
-                                          Text(
-                                            UserController.selectedPaymentMethod
-                                                .value.accountNumber,
-                                            style: TextStyle(
-                                                color: maincolor,
-                                                fontWeight: FontWeight.w600),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                UserController
+                                                    .selectedPaymentMethod
+                                                    .value
+                                                    .accountNumber,
+                                                style: TextStyle(
+                                                    color: maincolor,
+                                                    fontWeight:
+                                                        FontWeight.w600),
+                                              ),
+                                              const SizedBox(
+                                                width: 5,
+                                              ),
+                                              GestureDetector(
+                                                onTap: () {
+                                                  Clipboard.setData(
+                                                      ClipboardData(
+                                                    text: UserController
+                                                        .selectedPaymentMethod
+                                                        .value
+                                                        .accountNumber,
+                                                  )).then((_) {
+                                                    Get.snackbar('Copied',
+                                                        'Copied to clipboard',
+                                                        snackPosition:
+                                                            SnackPosition
+                                                                .BOTTOM);
+                                                  });
+                                                },
+                                                child: Icon(
+                                                  EneftyIcons.copy_outline,
+                                                  color: maincolor,
+                                                  size: 16,
+                                                ),
+                                              )
+                                            ],
                                           ),
                                         ],
                                       ),

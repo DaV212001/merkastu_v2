@@ -3,12 +3,12 @@ import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:merkastu_v2/controllers/socket_controller.dart';
-import 'package:merkastu_v2/controllers/theme_mode_controller.dart';
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 
 import '../constants/constants.dart';
 import '../constants/pages.dart';
+import '../controllers/socket_controller.dart';
+import '../controllers/theme_mode_controller.dart';
 import 'auth_controller.dart';
 import 'home_controller.dart';
 
@@ -22,6 +22,7 @@ class MainLayoutController extends GetxController {
   }
 
   final _homeController = Get.put(HomeController(), tag: 'home');
+  final CartController _cartController = Get.put(CartController(), tag: 'cart');
   final socketControl = Get.put(SocketController(), tag: 'socket');
   List<PersistentBottomNavBarItem> navBarsItems() {
     Color activeColor = maincolor;
@@ -72,11 +73,11 @@ class MainLayoutController extends GetxController {
             badgeContent: Obx(() => Padding(
                   padding: const EdgeInsets.all(1.0),
                   child: Text(
-                    _homeController.numberOfItemsInCart.value.toString(),
+                    _cartController.numberOfItemsInCart.value.toString(),
                     style: const TextStyle(color: Colors.white),
                   ),
                 )),
-            showBadge: _homeController.numberOfItemsInCart.value > 0,
+            showBadge: _cartController.numberOfItemsInCart.value > 0,
             child: const Icon(
               EneftyIcons.shopping_cart_bold,
               color: Colors.white,
@@ -89,11 +90,11 @@ class MainLayoutController extends GetxController {
                   badgeContent: Obx(() => Padding(
                         padding: const EdgeInsets.all(1.0),
                         child: Text(
-                          _homeController.numberOfItemsInCart.value.toString(),
+                          _cartController.numberOfItemsInCart.value.toString(),
                           style: const TextStyle(color: Colors.white),
                         ),
                       )),
-                  showBadge: _homeController.numberOfItemsInCart.value > 0,
+                  showBadge: _cartController.numberOfItemsInCart.value > 0,
                   child: const Icon(
                     EneftyIcons.shopping_cart_outline,
                     color: Colors.white,

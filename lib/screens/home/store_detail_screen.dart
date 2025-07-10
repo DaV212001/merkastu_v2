@@ -1,7 +1,9 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:badges/badges.dart' as badge;
+import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:logger/logger.dart';
 import 'package:merkastu_v2/components/restaurant/restaurant_detail_screen_top_section.dart';
 import 'package:merkastu_v2/constants/pages.dart';
 import 'package:merkastu_v2/controllers/home_controller.dart';
@@ -20,6 +22,7 @@ import '../../widgets/product_detail_bottom_sheet.dart';
 
 class StoreDetailScreen extends StatelessWidget {
   final HomeController controller = Get.find<HomeController>(tag: 'home');
+  final CartController cartController = Get.find<CartController>(tag: 'cart');
   final DragDropController dragDropController = Get.put(DragDropController());
   StoreDetailScreen({super.key});
 
@@ -153,9 +156,14 @@ class StoreDetailScreen extends StatelessWidget {
                                                       .stopDragging(),
                                               child: GestureDetector(
                                                 onTap: () {
-                                                  Get.bottomSheet(ProductDetail(
-                                                    product: currentProduct,
-                                                  ));
+                                                  if (controller.selectedStore
+                                                          .value.isAvailable ==
+                                                      true) {
+                                                    Get.bottomSheet(
+                                                        ProductDetail(
+                                                      product: currentProduct,
+                                                    ));
+                                                  }
                                                 },
                                                 child: ProductCard(
                                                   image: currentProduct.image!,
@@ -179,10 +187,21 @@ class StoreDetailScreen extends StatelessWidget {
                                                               currentProduct);
                                                     }
                                                   },
-                                                  onImageTap: () => controller
-                                                      .toggleSelectionInStore(
-                                                          currentProduct),
-                                                  isSelected: controller
+                                                  onImageTap: () {
+                                                    Logger().d('IS AVAILABLE: '
+                                                        '${controller.selectedStore.value.isAvailable}');
+                                                    controller
+                                                                .selectedStore
+                                                                .value
+                                                                .isAvailable ==
+                                                            true
+                                                        ? cartController
+                                                            .toggleSelectionInStore(
+                                                                currentProduct)
+                                                        : Get.snackbar('Error',
+                                                            'Cannot select products when store is closed');
+                                                  },
+                                                  isSelected: cartController
                                                       .listOfSelectedProductsInStore
                                                       .contains(currentProduct),
                                                 ),
@@ -199,32 +218,36 @@ class StoreDetailScreen extends StatelessWidget {
                   left: fabPosition.value.dx,
                   top: fabPosition.value.dy,
                   child: DragTarget<Product>(
-                    onAccept: (Product product) {
-                      dragDropController
-                          .addToCart(product); // Add product to cart on drop
+                    onAcceptWithDetails: (DragTargetDetails<Product> product) {
+                      if (controller.selectedStore.value.isAvailable == true) {
+                        dragDropController.addToCart(product.data);
+                      }
                     },
                     builder: (context, candidateData, rejectedData) {
                       return Draggable(
                         feedback: FloatingActionButton(
                           backgroundColor: maincolor,
                           onPressed: () => Get.toNamed(Routes.cartRoute),
-                          child: badge.Badge(
-                            showBadge: controller.numberOfItemsInCart.value > 0,
-                            badgeContent: Obx(
-                              () => Padding(
-                                padding: const EdgeInsets.all(1.0),
-                                child: Text(
-                                  controller.numberOfItemsInCart.value
-                                      .toString(),
-                                  style: const TextStyle(color: Colors.white),
+                          child: Obx(() => badge.Badge(
+                                showBadge:
+                                    cartController.numberOfItemsInCart.value >
+                                        0,
+                                badgeContent: Obx(
+                                  () => Padding(
+                                    padding: const EdgeInsets.all(1.0),
+                                    child: Text(
+                                      cartController.numberOfItemsInCart.value
+                                          .toString(),
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.shopping_cart,
-                              size: 35,
-                            ),
-                          ),
+                                child: const Icon(
+                                  EneftyIcons.shopping_cart_bold,
+                                  size: 35,
+                                ),
+                              )),
                         ),
                         onDragEnd: (dragDetails) {
                           fabPosition.value = dragDetails.offset;
@@ -234,23 +257,26 @@ class StoreDetailScreen extends StatelessWidget {
                         child: FloatingActionButton(
                           backgroundColor: maincolor,
                           onPressed: () => Get.toNamed(Routes.cartRoute),
-                          child: badge.Badge(
-                            showBadge: controller.numberOfItemsInCart.value > 0,
-                            badgeContent: Obx(
-                              () => Padding(
-                                padding: const EdgeInsets.all(1.0),
-                                child: Text(
-                                  controller.numberOfItemsInCart.value
-                                      .toString(),
-                                  style: const TextStyle(color: Colors.white),
+                          child: Obx(() => badge.Badge(
+                                showBadge:
+                                    cartController.numberOfItemsInCart.value >
+                                        0,
+                                badgeContent: Obx(
+                                  () => Padding(
+                                    padding: const EdgeInsets.all(1.0),
+                                    child: Text(
+                                      cartController.numberOfItemsInCart.value
+                                          .toString(),
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.shopping_cart,
-                              size: 35,
-                            ),
-                          ),
+                                child: const Icon(
+                                  EneftyIcons.shopping_cart_outline,
+                                  size: 35,
+                                ),
+                              )),
                         ),
                       );
                     },

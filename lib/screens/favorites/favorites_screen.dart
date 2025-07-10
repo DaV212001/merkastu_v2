@@ -138,6 +138,10 @@ class FavoritesScreen extends StatelessWidget {
                                             .deliveryTime!
                                             .toString(),
                                         favorited: true,
+                                        isAvailable: controller
+                                                .filteredStoreList[index]
+                                                .isAvailable ??
+                                            false,
                                       ).animateOnPageLoad(animationsMap[
                                           'containerOnPageLoadAnimation']!),
                                     ),

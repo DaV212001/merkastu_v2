@@ -7,14 +7,16 @@ import '../../../controllers/app_info_controller.dart';
 import '../../../utils/api_call_status.dart';
 import '../../../widgets/cards/error_card.dart';
 
-class PrivacyPolicyScreen extends StatelessWidget {
-  PrivacyPolicyScreen({super.key});
+class CancellationPolicyScreen extends StatelessWidget {
+  CancellationPolicyScreen({super.key});
+
   final controller = Get.find<AppInfoController>(tag: 'appInfo');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Privacy Policy'),
+        title: const Text('Cancellation Policy'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -22,18 +24,20 @@ class PrivacyPolicyScreen extends StatelessWidget {
           child: Column(
             children: [
               Obx(
-                () => controller.gettingPrivacyPolicy.value ==
+                () => controller.gettingCancellationPolicy.value ==
                         ApiCallStatus.loading
                     ? const Loading()
-                    : controller.gettingPrivacyPolicy.value ==
+                    : controller.gettingCancellationPolicy.value ==
                             ApiCallStatus.error
                         ? Center(
                             child: ErrorCard(
-                              errorData: controller.errorGettingPrivacyPolicy,
-                              refresh: () => controller.fetchPrivacyPolicy(),
+                              errorData:
+                                  controller.errorGettingCancellationPolicy,
+                              refresh: () =>
+                                  controller.fetchCancellationPolicy(),
                             ),
                           )
-                        : controller.appInfoPrivacyPolicy.value.isEmpty
+                        : controller.appInfoCancellationPolicy.value.isEmpty
                             ? Center(
                                 child: ErrorCard(
                                   errorData: ErrorData(
@@ -42,10 +46,10 @@ class PrivacyPolicyScreen extends StatelessWidget {
                                           'No information found, please try later',
                                       image: 'assets/images/empty.svg'),
                                   refresh: () =>
-                                      controller.fetchPrivacyPolicy(),
+                                      controller.fetchCancellationPolicy(),
                                 ),
                               )
-                            : Text(controller.appInfoPrivacyPolicy.value),
+                            : Text(controller.appInfoCancellationPolicy.value),
               )
             ],
           ),

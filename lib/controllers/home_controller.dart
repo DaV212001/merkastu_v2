@@ -8,6 +8,7 @@ import 'package:merkastu_v2/controllers/auth_controller.dart';
 import 'package:merkastu_v2/controllers/favorites_controller.dart';
 import 'package:merkastu_v2/controllers/main_layout_controller.dart';
 import 'package:merkastu_v2/controllers/order_controller.dart';
+import 'package:merkastu_v2/models/order.dart';
 import 'package:merkastu_v2/utils/api_call_status.dart';
 import 'package:merkastu_v2/utils/error_data.dart';
 import 'package:merkastu_v2/utils/error_utils.dart';
@@ -39,9 +40,6 @@ class HomeController extends GetxController {
 
   var productCategoryList = <ProductCategory>[].obs;
   var selectedCategory = ProductCategory(id: 'all').obs;
-
-  var cart = <Product>[].obs;
-  var numberOfItemsInCart = 0.obs;
 
   void filterStores() {
     filteredStoreList.value = List.from(storeList);
@@ -187,7 +185,9 @@ class HomeController extends GetxController {
     }
     product.favorited = true;
     filteredProductList.refresh();
-    cart.refresh();
+    if (Get.isRegistered<CartController>(tag: 'cart')) {
+      Get.find<CartController>(tag: 'cart').cart.refresh();
+    }
     dio.Response response;
     try {
       response = await DioConfig.dio().post('/user/store/product/save',
@@ -205,7 +205,9 @@ class HomeController extends GetxController {
           Get.find<FavoritesController>(tag: 'favorites')
               .fetchFavoritedProducts();
         }
-        cart.refresh();
+        if (Get.isRegistered<CartController>(tag: 'cart')) {
+          Get.find<CartController>(tag: 'cart').cart.refresh();
+        }
       } else {
         product.favorited = false;
         throw Exception(response.data);
@@ -216,7 +218,9 @@ class HomeController extends GetxController {
       Get.snackbar('Error', 'Couldn\'t favorite product');
     }
     filteredProductList.refresh();
-    cart.refresh();
+    if (Get.isRegistered<CartController>(tag: 'cart')) {
+      Get.find<CartController>(tag: 'cart').cart.refresh();
+    }
   }
 
   void unfavoriteProduct(Product product) async {
@@ -226,7 +230,9 @@ class HomeController extends GetxController {
     }
     product.favorited = false;
     filteredProductList.refresh();
-    cart.refresh();
+    if (Get.isRegistered<CartController>(tag: 'cart')) {
+      Get.find<CartController>(tag: 'cart').cart.refresh();
+    }
     dio.Response response;
     try {
       response = await DioConfig.dio().put('/user/store/product/unsave',
@@ -243,7 +249,9 @@ class HomeController extends GetxController {
           Get.find<FavoritesController>(tag: 'favorites')
               .fetchFavoritedProducts();
         }
-        cart.refresh();
+        if (Get.isRegistered<CartController>(tag: 'cart')) {
+          Get.find<CartController>(tag: 'cart').cart.refresh();
+        }
       } else {
         product.favorited = true;
         throw Exception(response.data);
@@ -254,7 +262,9 @@ class HomeController extends GetxController {
       Get.snackbar('Error', 'Couldn\'t unfavorite product');
     }
     filteredProductList.refresh();
-    cart.refresh();
+    if (Get.isRegistered<CartController>(tag: 'cart')) {
+      Get.find<CartController>(tag: 'cart').cart.refresh();
+    }
   }
 
   void searchForProducts(String query) {
@@ -325,6 +335,27 @@ class HomeController extends GetxController {
     }
   }
 
+  @override
+  void onInit() {
+    fetchStores();
+    super.onInit();
+  }
+}
+
+class CartController extends GetxController {
+  @override
+  void onInit() {
+    ever(cart, (_) {
+      calculateTotalProductPrice();
+      updateNonDeliveryOnlyFlag();
+    });
+    super.onInit();
+  }
+
+  var orderType = OrderType.delivery.obs;
+  var cart = <Product>[].obs;
+  var numberOfItemsInCart = 0.obs;
+
   var totalProductPrice = 0.00.obs;
 
   void addProductAmount(Product product) {
@@ -339,7 +370,65 @@ class HomeController extends GetxController {
     cart.refresh();
   }
 
+  bool isOrderFromNonDeliveryOnly(Order order) {
+    bool nonDeliveryOnly = true;
+    for (StoreSmall store in (order.stores ?? [])) {
+      String storeId = store.id ?? '';
+      Store? storeFromHome = Get.find<HomeController>(tag: 'home')
+          .storeList
+          .firstWhereOrNull((store) => store.id == storeId);
+      if (storeFromHome?.deliveryOnly == true) {
+        nonDeliveryOnly = false;
+        break;
+      }
+    }
+    return nonDeliveryOnly;
+  }
+
+  bool canAddProductToCart(Product product, {bool dontShowSnack = false}) {
+    if (cart.isEmpty) {
+      return true; // No restrictions if the cart is empty
+    }
+
+    // Get the deliveryOnly status of the first product's store
+    Store? firstStore = Get.find<HomeController>(tag: 'home')
+        .storeList
+        .firstWhereOrNull((store) => store.id == cart.first.storeId);
+
+    Store? newProductStore = Get.find<HomeController>(tag: 'home')
+        .storeList
+        .firstWhereOrNull((store) => store.id == product.storeId);
+
+    if (firstStore == null || newProductStore == null) {
+      return false; // If store information is missing, prevent addition
+    }
+
+    if (firstStore.deliveryOnly != newProductStore.deliveryOnly) {
+      Get.snackbar(
+        'Error',
+        'You cannot mix products from stores supporting different delivery options',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false; // Prevent adding the product
+    }
+
+    if (firstStore.deliveryOnly == false &&
+        (firstStore.id != newProductStore.id)) {
+      Get.snackbar(
+        'Error',
+        'Can\'t add a product from a different store in one cart if your current store has multiple delivery options.',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false; // Prevent adding the product
+    }
+
+    return true; // Product can be added
+  }
+
   void addProductToCart(Product product) {
+    if (!canAddProductToCart(product)) return;
     cart.add(product);
     numberOfItemsInCart.value = cart.length;
     numberOfItemsInCart.refresh();
@@ -396,6 +485,29 @@ class HomeController extends GetxController {
         );
       }
     }
+  }
+
+  // Reactive flag to indicate if the cart contains any non-delivery-only product
+  var hasNonDeliveryOnlyProduct = false.obs;
+
+  /// Updates the flag indicating whether the cart contains any product
+  /// from a store that is not marked as deliveryOnly.
+  void updateNonDeliveryOnlyFlag() {
+    if (cart.isEmpty) {
+      hasNonDeliveryOnlyProduct.value = false;
+      return;
+    }
+
+    // Assuming HomeController is registered and exposes a storeList.
+    final homeController = Get.find<HomeController>(tag: 'home');
+
+    hasNonDeliveryOnlyProduct.value = cart.any((product) {
+      final store = homeController.storeList.firstWhereOrNull(
+        (store) => store.id == product.storeId,
+      );
+      // The condition checks if the store exists and its deliveryOnly flag is false.
+      return store != null && store.deliveryOnly != true;
+    });
   }
 
   void removeProductsFromCart(List<Product> products,
@@ -461,8 +573,12 @@ class HomeController extends GetxController {
   }
 
   var selectedPaymentPlan = PaymentMethod.none.obs;
+  RxMap<String, List<Product>> groupedItemsCache =
+      RxMap<String, List<Product>>({});
+
   // This method will group products by storeId
   Map<String, List<Product>> groupCartItemsByStore() {
+    // if (groupItems.value) {
     Map<String, List<Product>> groupedCart = {};
 
     for (var product in cart) {
@@ -474,12 +590,23 @@ class HomeController extends GetxController {
         groupedCart[product.storeId!] = [product];
       }
     }
+    groupedItemsCache.value = groupedCart;
     // Logger().d(groupedCart);
     return groupedCart;
+    // } else {
+    //   return groupedItemsCache;
+    // }
   }
 
   String? storeNameById(String storeId) {
-    return storeList.firstWhere((store) => store.id == storeId).name;
+    String? storeName = '';
+    if (Get.isRegistered<HomeController>(tag: 'home')) {
+      storeName = Get.find<HomeController>(tag: 'home')
+          .storeList
+          .firstWhere((store) => store.id == storeId)
+          .name;
+    }
+    return storeName;
   }
 
   var block = (UserController.user.value.block ?? 0).toString().obs;
@@ -491,6 +618,8 @@ class HomeController extends GetxController {
   var listOfSelectedProductsInStore = <Product>[].obs;
 
   void toggleSelectionInStore(Product product) {
+    if (!canAddProductToCart(product)) return;
+    Logger().d('CLOSED');
     if (listOfSelectedProductsInStore.contains(product)) {
       listOfSelectedProductsInStore.remove(product);
       product.isSelected = false;
@@ -499,7 +628,9 @@ class HomeController extends GetxController {
       product.isSelected = true;
     }
     listOfSelectedProductsInStore.refresh();
-    filteredProductList.refresh();
+    if (Get.isRegistered<HomeController>(tag: 'home')) {
+      Get.find<HomeController>(tag: 'home').filteredProductList.refresh();
+    }
   }
 
   void addSelectedProductsToCart() {
@@ -547,9 +678,15 @@ class HomeController extends GetxController {
       product.isSelected = true;
     }
     listOfSelectedProductsInCart.refresh();
-    filteredProductList.refresh();
+    if (Get.isRegistered<HomeController>(tag: 'home')) {
+      Get.find<HomeController>(tag: 'home').filteredProductList.refresh();
+    }
   }
 
+  var groupItems = true.obs;
+  var recalculateTotals = true.obs;
+  var nameOfStoreAccount = ''.obs;
+  var storeAccount = ''.obs;
   var placingOrder = ApiCallStatus.holding.obs;
   void placeOrder({required TabController tabController}) async {
     UserController.getLoggedInUser();
@@ -586,12 +723,15 @@ class HomeController extends GetxController {
       if (room.value != UserController.user.value.room.toString())
         "deliveryRoom": room.value,
       "paymentMethod": selectedPaymentPlan.value.name,
+      "orderType":
+          hasNonDeliveryOnlyProduct.value ? orderType.value.name : 'DELIVERY'
     };
 
     // Logging the generated body
     Logger().i(body);
     dio.Response response = dio.Response(requestOptions: dio.RequestOptions());
     print(ConfigPreference.getUserToken());
+    // groupItems.value = false;
     try {
       placingOrder.value = ApiCallStatus.loading;
       response = await DioConfig.dio().post(
@@ -607,6 +747,7 @@ class HomeController extends GetxController {
       Logger().d(response.data);
       if ((response.statusCode == 201 || response.statusCode == 200) &&
           response.data['status']) {
+        recalculateTotals.value = false;
         if (Get.isRegistered<OrderController>()) {
           var orderControl = Get.find<OrderController>(tag: 'order');
           orderControl.fetchActiveOrders();
@@ -618,29 +759,46 @@ class HomeController extends GetxController {
             backgroundColor: maincolor, colorText: Colors.white);
         orderId.value = response.data['data']['orderId'].toString();
         if (selectedPaymentPlan.value == PaymentMethod.wallet) {
+          print('here1');
           Get.offNamedUntil(Routes.initialRoute, (r) => true);
           UserController.getWalletBalance();
           var mainControl = Get.find<MainLayoutController>(tag: 'main');
           mainControl.controller.jumpToTab(3);
-
+          // cart.clear();
+          // numberOfItemsInCart.value = 0;
+          // numberOfItemsInCart.refresh();
+          // cart.refresh();
+          orderId.value = '';
+          transactionId.value = '';
+          selectedPaymentPlan.value = PaymentMethod.none;
+          placingOrder.value = ApiCallStatus.success;
           return;
+        }
+
+        if (response.data['data'].containsKey('bankAccountInfo')) {
+          nameOfStoreAccount.value =
+              response.data['data']['bankAccountInfo']['name'];
+          storeAccount.value =
+              response.data['data']['bankAccountInfo']['account_number'];
         }
 
         if (selectedPaymentPlan.value != PaymentMethod.wallet) {
           tabController.animateTo(1);
         }
-        cart.clear();
-        numberOfItemsInCart.value = 0;
-        numberOfItemsInCart.refresh();
-        cart.refresh();
-        orderId.value = '';
+        print('here 2 ${selectedPaymentPlan.value}');
+        // cart.clear();
+        // numberOfItemsInCart.value = 0;
+        // numberOfItemsInCart.refresh();
+        // cart.refresh();
+        // orderId.value = '';
         transactionId.value = '';
-        selectedPaymentPlan.value = PaymentMethod.none;
-        placingOrder.value = ApiCallStatus.holding;
+        // selectedPaymentPlan.value = PaymentMethod.none;
+        // placingOrder.value = ApiCallStatus.holding;
       } else {
         throw Exception(response.data['message']);
       }
       placingOrder.value = ApiCallStatus.success;
+      recalculateTotals.value = true;
     } catch (e, stack) {
       Logger().t(e, stackTrace: stack);
       placingOrder.value = ApiCallStatus.error;
@@ -680,51 +838,54 @@ class HomeController extends GetxController {
 
   void verifyPayment() async {
     dio.Response response = dio.Response(requestOptions: dio.RequestOptions());
-    try {
-      verifyingPayment.value = true;
-      response = await DioConfig.dio().post(
-        '/user/payment/verify-order-payment',
-        data: {"orderId": orderId.value, "referenceId": transactionId.value},
+    verifyingPayment.value = true;
+    await DioService.dioTwoProngedRequest(
+        path: '/user/payment/verify-order-payment',
+        paymentMethod: selectedPaymentPlan.value,
+        orderId: orderId.value,
+        transactionId: transactionId.value,
         options: dio.Options(
           headers: {
             'Authorization': ConfigPreference.getUserToken(),
           },
-          contentType: 'application/json',
+          contentType: 'multipart/form-data',
         ),
-      );
-      Logger().d(response.data);
-      if ((response.statusCode == 201 || response.statusCode == 200) &&
-          response.data['status']) {
-        cart.clear();
-        numberOfItemsInCart.value = 0;
-        numberOfItemsInCart.refresh();
-        cart.refresh();
-        orderId.value = '';
-        transactionId.value = '';
-        selectedPaymentPlan.value = PaymentMethod.none;
+        onSuccess: (res) async {
+          print('Upload successful');
+          Logger().d(res.data);
+          if ((res.statusCode == 201 || res.statusCode == 200) &&
+              res.data['status']) {
+            cart.clear();
+            numberOfItemsInCart.value = 0;
+            numberOfItemsInCart.refresh();
+            cart.refresh();
+            orderId.value = '';
+            transactionId.value = '';
+            selectedPaymentPlan.value = PaymentMethod.none;
 
-        Get.snackbar('Success', 'Payment successfully verified',
-            backgroundColor: maincolor, colorText: Colors.white);
-        if (Get.isRegistered<OrderController>()) {
-          var orderControl = Get.find<OrderController>(tag: 'order');
-          orderControl.fetchActiveOrders();
-        } else {
-          var orderControl = Get.put(OrderController(), tag: 'order');
-          orderControl.fetchActiveOrders();
-        }
-        Get.offNamedUntil(Routes.initialRoute, (r) => true);
-        var mainControl = Get.find<MainLayoutController>(tag: 'main');
-        mainControl.controller.jumpToTab(3);
-      } else {
-        throw Exception(response.data['message']);
-      }
-      placingOrder.value = ApiCallStatus.holding;
-      verifyingPayment.value = false;
-    } catch (e, stack) {
-      Logger().t(e, stackTrace: stack);
-      verifyingPayment.value = false;
-      Get.snackbar('Error', 'Failed to verify payment, please try again');
-    }
+            Get.snackbar('Success', 'Payment successfully verified',
+                backgroundColor: maincolor, colorText: Colors.white);
+            if (Get.isRegistered<OrderController>()) {
+              var orderControl = Get.find<OrderController>(tag: 'order');
+              orderControl.fetchActiveOrders();
+            } else {
+              var orderControl = Get.put(OrderController(), tag: 'order');
+              orderControl.fetchActiveOrders();
+            }
+            Get.offNamedUntil(Routes.initialRoute, (r) => true);
+            var mainControl = Get.find<MainLayoutController>(tag: 'main');
+            mainControl.controller.jumpToTab(3);
+            // groupItems.value = true;
+          } else {
+            verifyingPayment.value = false;
+            throw Exception(res.data['message']);
+          }
+          verifyingPayment.value = false;
+        },
+        onFailure: (e, res) {
+          verifyingPayment.value = false;
+          Get.snackbar('Error', 'Failed to verify payment, please try again');
+        });
   }
 
   // Expose the helper methods via the same method names
@@ -733,8 +894,11 @@ class HomeController extends GetxController {
   }
 
   String calculateStoreDeliveryFee(String storeId) {
-    return CalculationHelper.calculateStoreDeliveryFee(
-        storeId, cart, storeList);
+    if (Get.isRegistered<HomeController>(tag: 'home')) {
+      return CalculationHelper.calculateStoreDeliveryFee(
+          storeId, cart, Get.find<HomeController>(tag: 'home').storeList);
+    }
+    return '0';
   }
 
   int calculateTotalQuantityOfProductsFromSpecificStore(String storeId) {
@@ -747,11 +911,107 @@ class HomeController extends GetxController {
         CalculationHelper.calculateTotalProductPrice(cart);
     totalProductPrice.refresh();
   }
-
-  @override
-  void onInit() {
-    fetchStores();
-    super.onInit();
-    ever(cart, (_) => calculateTotalProductPrice());
-  }
 }
+
+// void verifyPayment() async {
+//   verifyingPayment.value = true;
+//   // Step 1: Download the PDF receipt file
+//   final directory = await getExternalStorageDirectory();
+//   final filePath = '${directory?.path}/receipt.pdf';
+//   final pdfFile = File(filePath);
+//   print('going to download');
+//   var dioCertBypass = dio.Dio();
+//
+//   (dioCertBypass.httpClientAdapter as DefaultHttpClientAdapter)
+//       .onHttpClientCreate = (HttpClient client) {
+//     client.badCertificateCallback =
+//         (X509Certificate cert, String host, int port) => true;
+//     return client;
+//   };
+//   var downloadRes = await dioCertBypass.download(
+//       'https://apps.cbe.com.et:100/?id=FT24297FC1Q899264969', filePath);
+//   print(downloadRes.data);
+//
+//   // Step 3: Create FormData with the HTML file
+//   dio.FormData formData = dio.FormData.fromMap({
+//     "receipt":
+//         await dio.MultipartFile.fromFile(filePath, filename: "receipt.pdf"),
+//     "orderId": orderId.value,
+//     "paymentMethod": "CBE",
+//   });
+//
+//   // Step 4: Send the HTML file as form data
+//   await DioService.dioPostFormData(
+//       path:
+//           'https://793b-102-213-68-99.ngrok-free.app/user/payment/verify-order-payment',
+//       formData: formData,
+//       options: dio.Options(
+//         headers: {
+//           'Authorization': ConfigPreference.getUserToken(),
+//         },
+//         contentType: 'multipart/form-data',
+//       ),
+//       onSuccess: (res) async {
+//         print('Upload successful');
+//         Logger().d(res.data);
+//         if ((res.statusCode == 201 || res.statusCode == 200) &&
+//             res.data['status']) {
+//           if (await pdfFile.exists()) {
+//             await pdfFile.delete();
+//             print('HTML file deleted successfully');
+//           }
+//           cart.clear();
+//           numberOfItemsInCart.value = 0;
+//           numberOfItemsInCart.refresh();
+//           cart.refresh();
+//           orderId.value = '';
+//           transactionId.value = '';
+//           selectedPaymentPlan.value = PaymentMethod.none;
+//
+//           Get.snackbar('Success', 'Payment successfully verified',
+//               backgroundColor: maincolor, colorText: Colors.white);
+//           if (Get.isRegistered<OrderController>()) {
+//             var orderControl = Get.find<OrderController>(tag: 'order');
+//             orderControl.fetchActiveOrders();
+//           } else {
+//             var orderControl = Get.put(OrderController(), tag: 'order');
+//             orderControl.fetchActiveOrders();
+//           }
+//           Get.offNamedUntil(Routes.initialRoute, (r) => true);
+//           var mainControl = Get.find<MainLayoutController>(tag: 'main');
+//           mainControl.controller.jumpToTab(3);
+//         } else {
+//           throw Exception(res.data['message']);
+//         }
+//         placingOrder.value = ApiCallStatus.holding;
+//         verifyingPayment.value = false;
+//       });
+//   // await DioService.dioGet(
+//   //     path:
+//   //         'https://transactioninfo.ethiotelecom.et/receipt/${transactionId.value}',
+//   //     onSuccess: (res) async {
+//   //       Logger().f(res.data);
+//   //       // // Step 2: Convert response data to HTML and save it on the phone
+//   //       // final htmlContent = res.data.toString();
+//   //       // final directory = await getApplicationDocumentsDirectory();
+//   //       // final filePath = '${directory.path}/receipt.html';
+//   //       // final htmlFile = File(filePath);
+//   //       // await htmlFile.writeAsString(htmlContent);
+//   //
+//   //
+//   //     },
+//   //     onFailure: (e, res) {
+//   //       verifyingPayment.value = false;
+//   //       Get.snackbar('Error', 'Failed to verify payment, please try again');
+//   //     });
+//   // response = await DioConfig.dio().post(
+//   //   '/user/payment/verify-order-payment',
+//   //   data: {"orderId": orderId.value, "referenceId": transactionId.value},
+//   //   options: dio.Options(
+//   //     headers: {
+//   //       'Authorization': ConfigPreference.getUserToken(),
+//   //     },
+//   //     contentType: 'application/json',
+//   //   ),
+//   // );
+// }

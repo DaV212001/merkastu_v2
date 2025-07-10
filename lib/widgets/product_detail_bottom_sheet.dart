@@ -21,6 +21,7 @@ class ProductDetail extends StatefulWidget {
 
 class _ProductDetailState extends State<ProductDetail> {
   final HomeController homeController = Get.find<HomeController>(tag: 'home');
+  final CartController cartController = Get.find<CartController>(tag: 'cart');
 
   @override
   Widget build(BuildContext context) {
@@ -267,7 +268,7 @@ class _ProductDetailState extends State<ProductDetail> {
                                                           addon.amount! - 1;
                                                     }
                                                   });
-                                                  homeController.cart.refresh();
+                                                  cartController.cart.refresh();
                                                 },
                                               ),
                                               Text(
@@ -285,7 +286,7 @@ class _ProductDetailState extends State<ProductDetail> {
                                                     addon.amount =
                                                         addon.amount! + 1;
                                                   });
-                                                  homeController.cart.refresh();
+                                                  cartController.cart.refresh();
                                                 },
                                               ),
                                             ],
@@ -299,7 +300,7 @@ class _ProductDetailState extends State<ProductDetail> {
                                   setState(() {
                                     addon.amount = isSelected! ? 1 : 0;
                                   });
-                                  homeController.cart.refresh();
+                                  cartController.cart.refresh();
                                 },
                               ),
                             ],
@@ -352,7 +353,7 @@ class _ProductDetailState extends State<ProductDetail> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Obx(() => !homeController.cart.contains(widget.product)
+                        Obx(() => !cartController.cart.contains(widget.product)
                             ? Row(children: [
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
@@ -412,19 +413,19 @@ class _ProductDetailState extends State<ProductDetail> {
                                   onPressed: widget.product.amount == 0 ||
                                           widget.product.amount == null
                                       ? null
-                                      : () => homeController.cart
+                                      : () => cartController.cart
                                               .contains(widget.product)
-                                          ? homeController
+                                          ? cartController
                                               .removeProductFromCart(
                                               widget.product,
                                             )
-                                          : homeController
+                                          : cartController
                                               .addProductToCart(widget.product),
                                   style: ElevatedButton.styleFrom(
                                       backgroundColor: maincolor,
                                       disabledBackgroundColor: Colors.grey),
                                   child: Text(
-                                      homeController.cart
+                                      cartController.cart
                                               .contains(widget.product)
                                           ? 'Remove from cart'
                                           : 'Add to cart',

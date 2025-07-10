@@ -10,7 +10,7 @@ class DeliveryAddressSelection extends StatelessWidget {
     required this.homeController,
   });
 
-  final HomeController homeController;
+  final CartController homeController;
 
   @override
   Widget build(BuildContext context) {

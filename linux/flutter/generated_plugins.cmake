@@ -3,6 +3,9 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  awesome_notifications
+  gtk
+  sim_card_info
   url_launcher_linux
 )
 

@@ -18,7 +18,7 @@ class Merkastu extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             theme: ThemeModeController.getThemeMode(),
             // Set the initial route
-            initialRoute: '/home',
+            initialRoute: Routes.initialRoute,
             // Define the routes using GetPage
             getPages: Pages.pages,
           ),

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:merkastu_v2/constants/constants.dart';
+
+import '../../controllers/theme_mode_controller.dart';
 
 class ProfileListCard extends StatelessWidget {
   final String name;
@@ -22,15 +25,17 @@ class ProfileListCard extends StatelessWidget {
     final bool bottomDivider;
     final Offset boxShadowOffset;
     final double blurRadius;
-    Color shadowColor = const Color(0x348E8E8E);
+    Color shadowColor = ThemeModeController.isLightTheme.value
+        ? Colors.grey.withOpacity(0.3)
+        : Colors.transparent;
 
-    const cornerRadius = 15.0;
+    const cornerRadius = 7.0;
     if (isFirstTile == true && isLastTile == true) {
       borderRadius = const BorderRadius.all(Radius.circular(cornerRadius));
       bottomDivider = false;
       boxShadowOffset = Offset.zero;
       shadowColor = const Color(0x34202020);
-      blurRadius = cornerRadius;
+      blurRadius = 10;
     } else if (isFirstTile == true) {
       borderRadius = const BorderRadius.only(
         topRight: Radius.circular(cornerRadius),
@@ -69,14 +74,14 @@ class ProfileListCard extends StatelessWidget {
               borderRadius: borderRadius,
               boxShadow: [
                 BoxShadow(
-                  blurRadius: blurRadius,
-                  color: shadowColor,
-                  offset: boxShadowOffset,
-                )
+                    blurRadius: blurRadius,
+                    color: shadowColor,
+                    offset: boxShadowOffset,
+                    spreadRadius: 0)
               ],
             ),
             child: Material(
-              // color: maincolor,
+              color: Theme.of(context).cardColor,
               shape: RoundedRectangleBorder(
                 borderRadius: borderRadius,
               ),
@@ -90,7 +95,10 @@ class ProfileListCard extends StatelessWidget {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(left: 20),
-                            child: Icon(icon),
+                            child: Icon(
+                              icon,
+                              color: maincolor,
+                            ),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(left: 25),

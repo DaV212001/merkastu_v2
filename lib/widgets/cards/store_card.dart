@@ -11,6 +11,7 @@ class StoreCard extends StatelessWidget {
   final String location;
   final String image;
   final String deliveryTime;
+  final bool isAvailable;
   final bool favorited;
   final Function()? onHeartTap;
 
@@ -21,13 +22,13 @@ class StoreCard extends StatelessWidget {
       required this.image,
       required this.deliveryTime,
       required this.favorited,
-      this.onHeartTap});
+      this.onHeartTap,
+      required this.isAvailable});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      // height: MediaQuery.of(context).size.height * 0.35,
       decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(15),
@@ -35,29 +36,54 @@ class StoreCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(3.0),
-            child: cachedNetworkImageWrapper(
-              imageUrl: image,
-              imageBuilder: (context, imageProvider) => LargeCardImageHolder(
-                image: Image.network(
-                  image,
-                  width: double.infinity,
-                  height: MediaQuery.of(context).size.height * 0.15,
-                  fit: BoxFit.cover,
+          Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(3.0),
+                child: cachedNetworkImageWrapper(
+                  imageUrl: image,
+                  imageBuilder: (context, imageProvider) =>
+                      LargeCardImageHolder(
+                    image: Image.network(
+                      image,
+                      width: double.infinity,
+                      height: MediaQuery.of(context).size.height * 0.15,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  placeholderBuilder: (context, path) => const Loading(),
+                  errorWidgetBuilder: (context, path, object) =>
+                      LargeCardImageHolder(
+                    image: Image.asset(
+                      'assets/images/logo.png',
+                      width: double.infinity,
+                      height: MediaQuery.of(context).size.height * 0.15,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
               ),
-              placeholderBuilder: (context, path) => const Loading(),
-              errorWidgetBuilder: (context, path, object) =>
-                  LargeCardImageHolder(
-                image: Image.asset(
-                  'assets/images/logo.png',
-                  width: double.infinity,
-                  height: MediaQuery.of(context).size.height * 0.15,
-                  fit: BoxFit.cover,
+              Positioned(
+                top: 10,
+                right: 15,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: maincolor,
+                    borderRadius: BorderRadius.circular(7),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Text(
+                      isAvailable ? 'Open' : 'Closed',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall!
+                          .copyWith(color: Colors.white),
+                    ),
+                  ),
                 ),
-              ),
-            ),
+              )
+            ],
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -82,7 +108,7 @@ class StoreCard extends StatelessWidget {
                             : EneftyIcons.heart_outline,
                         color: maincolor,
                       ),
-                    )
+                    ),
                   ],
                 ),
                 const SizedBox(
@@ -98,16 +124,18 @@ class StoreCard extends StatelessWidget {
                     const SizedBox(
                       width: 5,
                     ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.8,
-                      child: AutoSizeText(
-                        location.trim(),
-                        maxLines: 2,
-                        minFontSize: 5,
-                        maxFontSize: 10,
-                        stepGranularity: 0.5,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodySmall,
+                    Expanded(
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        child: AutoSizeText(
+                          location.trim(),
+                          maxLines: 2,
+                          minFontSize: 5,
+                          maxFontSize: 10,
+                          stepGranularity: 0.5,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
                       ),
                     ),
                   ],

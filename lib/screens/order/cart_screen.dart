@@ -15,6 +15,7 @@ import 'package:merkastu_v2/widgets/product_detail_bottom_sheet.dart';
 import '../../models/product.dart';
 
 class CartScreen extends StatelessWidget {
+  final CartController controller = Get.find<CartController>(tag: 'cart');
   final HomeController homeController = Get.find<HomeController>(tag: 'home');
   CartScreen({super.key});
   @override
@@ -47,7 +48,7 @@ class CartScreen extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
         actions: [
-          Obx(() => homeController.listOfSelectedProductsInCart.isEmpty
+          Obx(() => controller.listOfSelectedProductsInCart.isEmpty
               ? Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
@@ -59,7 +60,7 @@ class CartScreen extends StatelessWidget {
                       child: SizedBox(
                         width: MediaQuery.of(context).size.width * 0.3,
                         child: AutoSizeText(
-                          'Total: ETB ${homeController.totalProductPrice}',
+                          'Total: ETB ${controller.totalProductPrice}',
                           maxLines: 1,
                           minFontSize: 5,
                           maxFontSize: 10,
@@ -77,10 +78,10 @@ class CartScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: GestureDetector(
                     onTap: () {
-                      homeController.removeProductsFromCart(
-                          homeController.listOfSelectedProductsInCart,
+                      controller.removeProductsFromCart(
+                          controller.listOfSelectedProductsInCart,
                           fromCartList: true);
-                      homeController.listOfSelectedProductsInCart.clear();
+                      controller.listOfSelectedProductsInCart.clear();
                     },
                     child: Icon(
                       EneftyIcons.trash_bold,
@@ -98,9 +99,9 @@ class CartScreen extends StatelessWidget {
           Obx(() {
             // Group products by store
             Map<String, List<Product>> groupedCart =
-                homeController.groupCartItemsByStore();
+                controller.groupCartItemsByStore();
 
-            return homeController.cart.isEmpty
+            return controller.cart.isEmpty
                 ? Center(
                     child: ErrorCard(
                       errorData: ErrorData(
@@ -123,7 +124,7 @@ class CartScreen extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   vertical: 8.0, horizontal: 8),
                               child: Text(
-                                '${homeController.storeNameById(storeId)}', // Assuming you have a method to get store name
+                                '${controller.storeNameById(storeId)}', // Assuming you have a method to get store name
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 14,
@@ -148,9 +149,9 @@ class CartScreen extends StatelessWidget {
                                         child: Dismissible(
                                           key: UniqueKey(),
                                           onDismissed: (direction) {
-                                            homeController
-                                                .removeProductFromCart(product,
-                                                    fromCartList: true);
+                                            controller.removeProductFromCart(
+                                                product,
+                                                fromCartList: true);
                                           },
                                           background:
                                               Container(color: Colors.red),
@@ -165,37 +166,34 @@ class CartScreen extends StatelessWidget {
                                                     .favoriteProduct(product);
                                               }
                                             },
-                                            // Build your cart item with product details here
                                             image: product.image!,
                                             name: product.name!,
                                             description: product.description!,
-                                            price: homeController
+                                            price: controller
                                                 .calculateSpecificProductPrice(
                                                     product),
-                                            onAdd: () => homeController
+                                            onAdd: () => controller
                                                 .addProductAmount(product),
-                                            onDuplicate: () => homeController
+                                            onDuplicate: () => controller
                                                 .duplicateProductToCart(
                                                     product),
                                             onRemove: () {
                                               if (product.amount == 1) {
-                                                homeController
+                                                controller
                                                     .removeProductFromCart(
                                                         product,
                                                         fromCartList: true);
                                               } else {
-                                                homeController
-                                                    .removeProductAmount(
-                                                        product);
+                                                controller.removeProductAmount(
+                                                    product);
                                               }
                                             },
                                             amount: product.amount.toString(),
                                             onImageTap: () {
-                                              homeController
-                                                  .toggleSelectionInCart(
-                                                      product);
+                                              controller.toggleSelectionInCart(
+                                                  product);
                                             },
-                                            isSelected: homeController
+                                            isSelected: controller
                                                 .listOfSelectedProductsInCart
                                                 .contains(product),
                                           ),
@@ -210,7 +208,7 @@ class CartScreen extends StatelessWidget {
                     ),
                   );
           }),
-          Obx(() => homeController.cart.isEmpty
+          Obx(() => controller.cart.isEmpty
               ? const SizedBox.shrink()
               : Padding(
                   padding: const EdgeInsets.all(16.0),

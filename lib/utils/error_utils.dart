@@ -17,7 +17,7 @@ class ErrorUtil {
   /// Returns:
   /// - [ErrorData]: An object containing the error title, body, image, and button text.
   static Future<ErrorData> getErrorData(String error) async {
-    print("Here in error Util $error");
+    // Get.snackbar('Error', error);
 
     var connectivityResult = await (Connectivity().checkConnectivity());
     // Logger().d(connectivityResult);
